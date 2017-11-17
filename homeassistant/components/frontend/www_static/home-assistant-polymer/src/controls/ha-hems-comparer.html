@@ -1,0 +1,165 @@
+<link rel='import' href='../../bower_components/polymer/polymer.html'>
+<link rel="import" href="../../bower_components/paper-material/paper-material.html">
+
+<dom-module id='ha-hems-comparer'>
+  <template>
+    <style include="paper-material">
+      :host {
+        display: block;
+        border-radius: 2px;
+        transition: all 0.30s ease-out;
+        padding:0 6px 0 6px;
+      }
+      .comparer-outer {
+        height: 130px;
+        width: 150px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .hems-comparer {
+        position: relative;
+        font-size: 12px;
+        line-height: 12px;
+      }
+      .bars-container {
+        display: block;
+        text-align: center;
+        border-bottom: 2px solid gray;
+      }
+      .bar {
+        display: inline-block;
+        vertical-align: bottom;
+        margin: 0 2px;
+      }
+      .bar > div:first-child {
+        text-align: left;
+        padding-bottom: 5px;
+      }
+      .rect {
+        width: 10px;
+        padding-right: 10px;
+        box-shadow: 4px -2px 4px 2px rgba(0, 0, 0, .2);
+        margin-right: 10px;
+      }
+      .estimate {
+        background: repeating-linear-gradient(
+          45deg,
+          orange,
+          orange 10px,
+          transparent 10px,
+          transparent 14px
+        );
+      }
+      .goal {
+        background-color: #3b92ef;
+      }
+      .actual {
+        background-color: #2db72d;
+      }
+    </style>
+    <div class="comparer-outer">
+      <div></div>
+      <div class="hems-comparer">
+        <div class="bars-container">
+          <div class="bar">
+            <div>[[estimate_label]]</div>
+            <div
+              class="rect estimate"
+              style="height: [[estimate_height]]px"
+            ></div>
+          </div>
+          <div class="bar">
+            <div>[[goal_label]]</div>
+            <div
+              class="rect goal"
+              style="height: [[goal_height]]px"
+            ></div>
+          </div>
+          <div class="bar">
+            <div>[[actual_label]]</div>
+            <div
+              class="rect actual"
+              style="height: [[actual_height]]px"
+            ></div>
+          </div>
+        </div>
+        <div class="item-label">[[item_label]]</div>
+      </div>
+    </div>
+  </template>
+</dom-module>
+
+<script>
+Polymer({
+  is: 'ha-hems-comparer',
+
+  properties: {
+    hass: {
+      type: Object,
+    },
+    estimate_label: {
+      type: String
+    },
+    estimate_number: {
+      type: Number
+    },
+    goal_label: {
+      type: String
+    },
+    goal_number: {
+      type: Number
+    },
+    actual_label: {
+      type: String
+    },
+    actual_number: {
+      type: Number
+    },
+    estimate_height: {
+      type: String
+    },
+    goal_height: {
+      type: String
+    },
+    actual_height: {
+      type: String
+    },
+    item_label: {
+      type: String
+    },
+    chartHeight: {
+      type: Number,
+      value: 100
+    },
+    max_value: {
+      type: Number,
+      observer: 'updateHeights'
+    }
+  },
+  updateHeights: function (maxValue) {
+    this.estimate_number = this.convertNumber(this.estimate_label);
+    this.goal_number = this.convertNumber(this.goal_label);
+    this.actual_number = this.convertNumber(this.actual_label);
+    this.estimate_height = this.computeHeight(this.estimate_number);
+    this.goal_height = this.computeHeight(this.goal_number);
+    this.actual_height = this.computeHeight(this.actual_number);
+  },
+  computeHeight: function (num) {
+      let itemHeight = -1;
+      itemHeight = num / this.getMax([this.estimate_number, this.goal_number, this.actual_number]) * this.chartHeight;
+      return Math.ceil(itemHeight);
+  },
+  convertNumber: function (str) {
+      const num = (str[0] === "$" ? Number(str.substring(1)) : Number(str));
+      return num;
+  },
+  getMax: function (items) {
+      const max = (this.max_value ? this.max_value : 0);
+
+      return max;
+  }
+});
+
+
+</script>

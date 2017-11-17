@@ -74,7 +74,7 @@ def setup(hass, config):
         else:
             attributes[target] = update_value
 
-        hass.states.set('advanced_settings.advanced_settings', State.from_dict(advanced_settings), attributes, True)
+        hass.states.set('advanced_settings.advanced_settings', 'On', attributes, True)
 
         _LOGGER.info("advanced settings after update: %s", hass.states.get('advanced_settings.advanced_settings'))
 

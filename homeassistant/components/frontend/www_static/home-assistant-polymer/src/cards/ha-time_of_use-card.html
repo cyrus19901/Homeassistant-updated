@@ -1,0 +1,52 @@
+<link rel='import' href='../../bower_components/polymer/polymer.html'>
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel='import' href='../components/ha-card.html'>
+
+<link rel='import' href='../controls/ha-energy-reduction-base.html'>
+
+<dom-module id='ha-time_of_use-card'>
+  <template>
+    <style is="custom-style" include="iron-flex"></style>
+    <ha-card class="time-of-use" style$="[[getUseOutlookStyle(stateObj)]]">
+      <ha-energy-reduction-base
+        card_name="[[stateObj.attributes.friendly_name]]"
+        compensation_or_savings="savings"
+        background_color="[[getUseOutlookStyle(stateObj)]]"
+        update_method="update_time_of_use"
+        update_platform="time_of_use"
+        other_method="update_energy_efficiency"
+        other_platform="energy_efficiency"
+        state_obj="[[stateObj]]"
+        hass="[[hass]]"
+      >
+      </ha-energy-reduction-base>
+    </ha-card>
+  </template>
+</dom-module>
+<script>
+Polymer({
+  is: 'ha-time_of_use-card',
+  properties: {
+    hass: {
+      type: Object,
+    },
+    stateObj: {
+      type: Object,
+    },
+    groupEntity: {
+      type: Object,
+    }
+  },
+  getUseOutlookStyle: function (stateObj) {
+      let useOutlookStyle = "";
+
+      if (stateObj)
+      {
+          const useOutlook = stateObj.attributes.useAlgorithm.value;
+          useOutlookStyle = (!useOutlook ? "background-color: lightgray" : '');
+      }
+      
+      return useOutlookStyle;
+  }
+});
+</script>

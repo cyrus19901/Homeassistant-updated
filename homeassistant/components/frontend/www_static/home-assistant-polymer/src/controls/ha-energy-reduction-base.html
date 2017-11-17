@@ -1,0 +1,341 @@
+<link rel='import' href='../../bower_components/polymer/polymer.html'>
+<link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+
+<link rel='import' href='./ha-hems-comparer.html'>
+
+
+<dom-module id='ha-energy-reduction-base'>
+  <template>
+    <style is="custom-style" include="iron-flex"></style>
+    <style>
+      .states {
+        padding-bottom: 16px;
+      }
+      .state {
+        padding: 4px 16px;
+      }
+      td, th {
+        padding-right: 8px;
+      }
+      .state .label {
+        color: rgba(0, 0, 0, 0.54);
+        font-weight: bold;
+        text-transform: capitalize;
+      }
+      .state .value {
+        color: rgba(0, 0, 0, 0.87);
+      }
+      .header {
+        @apply(--paper-font-headline);
+        /* overwriting line-height +8 because entity-toggle can be 40px height,
+           compensating this with reduced padding */
+        line-height: 40px;
+        color: var(--primary-text-color);
+        padding: 20px 16px 20px;
+      }
+      .header .name {
+        @apply(--paper-font-common-nowrap);
+
+      }
+      .header.domain .name {
+        /* Capitalize cards titles for default domain groups. */
+        text-transform: capitalize;
+      }
+      .comparer-container {
+        width: 400px;
+        height: 160px;
+        flex-direction: column;
+        justify-content: space-between;
+        display: flex;
+      }
+      .comparer-container > div {
+        display: block;
+        text-align: center;
+        margin-bottom: 10px;
+        white-space: nowrap;
+      }
+      .comparer-container > div > * {
+        display: inline-block;
+        vertical-align: bottom;
+      }
+      .outlook-label {
+        color: dimgray;
+        font-size: 16px;
+        font-weight: bold;
+        padding-left: 10px;
+      }
+      .toggle-container {
+        font-size: 14px;
+        padding-left: 10px;
+      }
+      .color-box {
+        height: 10px;
+        width: 10px;
+      }
+      .color-box.estimate {
+        background: repeating-linear-gradient(
+          45deg,
+          orange,
+          orange 2px,
+          transparent 2px,
+          transparent 4px
+        );
+      }
+      .color-box.goal {
+        background-color: #3b92ef;
+      }
+      .color-box.actual {
+        background-color: #2db72d;
+      }
+      .legend {
+        font-size: 14px;
+        line-height: 14px;
+        float: right;
+      }
+      .your-money {
+        float: right;
+        border: 2px solid gray;
+        font-size: 14px;
+        padding: 0 20px;
+        margin-right: 10px;
+      }
+      .your-money > .amount {
+        font-weight: bold;
+        color: green;
+      }
+
+    </style>
+    <div class="header domain">
+      <div class="name">[[card_name]]</div>
+      <div class="outlook-label">Today's Outlook</div>
+      <div class="legend">
+        <table>
+          <tbody>
+            <tr>
+              <td>
+                <div class="color-box estimate"></div>
+              </td>
+              <td>
+                estimate (from HEMS)
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="color-box goal"></div>
+              </td>
+              <td>
+                goal (from utility)
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="color-box actual"></div>
+              </td>
+              <td>
+                actual (from meter)
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="comparer-container">
+        <div></div>
+        <div>
+          <ha-hems-comparer 
+            estimate_label="[[getAttributes(state_obj, 'energyReductionEstimate', 'value')]]"
+            goal_label="[[getAttributes(state_obj, 'energyReductionGoal', 'value')]]"
+            actual_label="[[getAttributes(state_obj, 'energyReductionActual', 'value')]]"
+            item_label="energy reduction"
+            background_style="[[getUseOutlookStyle(state_obj)]]"
+            max_value="[[max_reduction]]"
+          ></ha-hems-comparer>
+          <ha-hems-comparer 
+            estimate_label="[[getAttributesFromLabel(state_obj, 'Estimate', 'value')]]"
+            goal_label="[[getAttributesFromLabel(state_obj, 'Goal', 'value')]]"
+            actual_label="[[getAttributesFromLabel(state_obj, 'Actual', 'value')]]"
+            item_label="[[compensation_or_savings]]"
+            background_style="[[getUseOutlookStyle(state_obj)]]"
+            max_value="[[max_money]]"
+          ></ha-hems-comparer>
+        </div>
+      </div>
+      <div class="your-money">
+        <span class="dollar-signs">$$</span> for you: <span class="amount">[[getAttributesFromLabel(state_obj, 'Actual', 'value')]]</span>
+      </div>
+      <div class="toggle-container">
+        <paper-toggle-button raised
+          on-change="useOutlook"
+          checked="[[getAttributes(state_obj, 'useAlgorithm', 'value')]]"
+          data-prop="useAlgorithm"
+        >
+          [[getToggleLabel(state_obj)]]
+        </paper-toggle-button>
+      </div>
+    </div>
+  </template>
+</dom-module>
+
+<script>
+Polymer({
+  is: 'ha-energy-reduction-base',
+  properties: {
+    hass: {
+      type: Object,
+      observer: 'updateMaxes'
+    },
+    state_obj: {
+      type: Object
+    },
+    groupEntity: {
+      type: Object,
+    },
+    useLabel: {
+      type: String,
+      value: "Use This Outlook"
+    },
+    notUseLabel: {
+      type: String,
+      value: "Don't Use This Outlook"
+    },
+    compensation_or_savings: {
+      type: String
+    },
+    background_color: {
+      type: String
+    },
+    update_method: {
+      type: String
+    },
+    update_platform: {
+      type: String
+    },
+    other_method: {
+      type: String
+    },
+    other_platform: {
+      type: String
+    },
+    max_reduction: {
+      type: Number
+    },
+    max_money: {
+      type: Number
+    }
+  },
+  updateMaxes: function () {
+      this.setMaxReduction();
+      this.setMaxMoney();
+  },
+  setMaxReduction: function () {
+      let max = 0;
+
+      if (this.hass)
+      {
+          const maxes = [];
+
+          const energyEfficiency = this.hass.states["energy_efficiency.peak_period_energy_and_compensation"].attributes;
+
+          maxes.push(Number(energyEfficiency.energyReductionActual.value));
+          maxes.push(Number(energyEfficiency.energyReductionEstimate.value));
+          maxes.push(Number(energyEfficiency.energyReductionGoal.value));
+
+          const timeOfUse = this.hass.states["time_of_use.time_of_use_energy_and_savings"].attributes;
+
+          maxes.push(Number(timeOfUse.energyReductionActual.value));
+          maxes.push(Number(timeOfUse.energyReductionEstimate.value));
+          maxes.push(Number(timeOfUse.energyReductionGoal.value));
+
+          max = Math.max(...maxes);
+      }
+
+      this.max_reduction = max;
+  },
+  setMaxMoney: function () {
+      let max = 0;
+
+      if (this.hass)
+      {
+          const maxes = [];
+
+          const energyEfficiency = this.hass.states["energy_efficiency.peak_period_energy_and_compensation"].attributes;
+
+          maxes.push(Number(this.convertNumber(energyEfficiency.compensationActual.value)));
+          maxes.push(Number(this.convertNumber(energyEfficiency.compensationEstimate.value)));
+          maxes.push(Number(this.convertNumber(energyEfficiency.compensationGoal.value)));
+
+          const timeOfUse = this.hass.states["time_of_use.time_of_use_energy_and_savings"].attributes;
+
+          maxes.push(Number(this.convertNumber(timeOfUse.savingsActual.value)));
+          maxes.push(Number(this.convertNumber(timeOfUse.savingsEstimate.value)));
+          maxes.push(Number(this.convertNumber(timeOfUse.savingsGoal.value)));
+
+          max = Math.max(...maxes);
+      }
+
+      this.max_money = max;
+  },
+  convertNumber: function (str) {
+      const num = (str[0] === "$" ? Number(str.substring(1)) : Number(str));
+      return num;
+  },
+  getLabel: function (labelType) {
+    const prefix = this.compensation_or_savings;
+    return `${prefix}${labelType}`;
+  },
+  useOutlook: function (evt) {
+      const checked = evt.target.checked;
+      const prop = evt.currentTarget.dataset.prop;
+
+      this.updateSetting(checked, prop, this.update_method, this.update_platform);
+      this.updateSetting(!checked, prop, this.other_method, this.other_platform);
+  },
+  getToggleLabel: function (stateObj) {
+      let toggleLabel = "";
+
+      if (stateObj)
+      {
+          const useOutlook = stateObj.attributes.useAlgorithm.value;
+          toggleLabel = (useOutlook ? this.useLabel : this.notUseLabel);
+      }
+      
+      return toggleLabel;
+  },
+  getUseOutlookStyle: function (stateObj) {
+      let useOutlookStyle = "";
+
+      if (stateObj)
+      {
+          const useOutlook = stateObj.attributes.useAlgorithm.value;
+          useOutlookStyle = (!useOutlook ? "background-color: lightgray" : '');
+      }
+      
+      return useOutlookStyle;
+  },
+  getAttributes: function(obj, attr, subattr) {
+    return obj.attributes[attr][subattr];
+  },
+  getAttributesFromLabel: function(obj, attr, subattr) {
+    const fullAttr = this.compensation_or_savings + attr;
+    return obj.attributes[fullAttr][subattr];
+  },
+  updateSetting: function (newValue, prop, method, platform) {
+      const updateObj = { 
+        'target': prop,
+        'subtarget': 'value',
+        'value': newValue 
+      };
+        
+      this.callServiceHelper(method, updateObj, platform);
+  },
+  callServiceHelper: function (service, data, platform) {
+    if (this.hass)
+    {      
+      this.hass.callService(platform, service, { value: data})
+        .then(function () {
+          // console.log('successful service call');
+        }.bind(this));
+    }
+  }
+});
+</script>

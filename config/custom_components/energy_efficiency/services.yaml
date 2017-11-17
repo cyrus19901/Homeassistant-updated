@@ -1,0 +1,9 @@
+
+update_energy_efficiency:
+  description: Update values in energy efficiency
+
+  fields:
+    obj:
+    entity_id:
+      description: An object containing the value
+      example: 'energy_efficiency.energy_efficiency'

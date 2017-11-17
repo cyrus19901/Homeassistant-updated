@@ -1,0 +1,116 @@
+<link rel='import' href='../../bower_components/polymer/polymer.html'>
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+
+<link rel='import' href='./ha-hems-comparer.html'>
+
+
+<dom-module id='ha-element-chooser'>
+  <template>
+    <style is="custom-style" include="iron-flex"></style>
+    <style>
+      .display-inline {
+        display: block;
+      }
+      .display-inline > div {
+        display: inline-block;
+      }
+      paper-input {
+          width: 30px;
+          font-size: 16px;
+          transform: translateY(-5px);
+      }
+      ha-time-select {
+        transform: translateY(-5px);
+      }
+    </style>
+    <div class="display-inline">
+      <template is="dom-if" if="[[isTime()]]">
+        <div>
+          <ha-time-select 
+            hass="[[hass]]"
+            state_obj="[[state_obj]]"
+            update_method="[[item_update_method]]"
+            time_value="[[item_value]]"
+            device_name="[[device_name]]"
+            setting_name="[[setting_name]]"
+            attr_name="[[attr_name]]"
+          ></ha-time-select>
+        </div>
+      </template>
+      <template is="dom-if" if="[[isNumber()]]">
+        <div>
+          <paper-input 
+            label=""
+            type="number"
+            on-change="updateSetting" 
+            value="[[item_value]]" 
+          >
+          </paper-input>
+        </div>
+        <div>[[item_units]]</div>
+      </template>
+    </div>
+  </template>
+</dom-module>
+
+<script>
+Polymer({
+  is: 'ha-element-chooser',
+  properties: {
+    hass: {
+      type: Object,
+      observer: 'updateMaxes'
+    },
+    state_obj: {
+      type: Object
+    },
+    item_type: {
+      type: String
+    },
+    item_value: {
+      type: String
+    },
+    item_units: {
+      type: String
+    },
+    device_name: {
+      type: String
+    },
+    setting_name: {
+      type: String
+    },
+    attr_name: {
+      type: String
+    },
+    item_update_method: {
+      type: String
+    }
+  },
+  isTime: function () {
+      return this.item_type === 'time';
+  },
+  isNumber: function () {
+      return this.item_type === 'number';
+  },
+  updateSetting: function (evt) {
+      const newValue = evt.currentTarget.value;
+
+      const updateObj = { 
+        'device': this.device_name,
+        'setting': this.setting_name,
+        'attr': this.attr_name,
+        'value': newValue 
+      };
+        
+      this.callServiceHelper(this.item_update_method, updateObj);
+  },
+  callServiceHelper: function (service, data) {
+    if (this.hass)
+    {      
+      this.hass.callService(this.state_obj._domain, service, { value: data})
+        .then(function () {
+        }.bind(this));
+    }
+  }
+});
+</script>

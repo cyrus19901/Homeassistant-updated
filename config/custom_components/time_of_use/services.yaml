@@ -1,0 +1,9 @@
+
+update_time_of_use:
+  description: Update values in time of use 
+
+  fields:
+    obj:
+    entity_id:
+      description: An object containing the value
+      example: 'time_of_use.time_of_use'

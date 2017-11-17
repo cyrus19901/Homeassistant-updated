@@ -12,7 +12,6 @@ time input modified from https://github.com/ryanburns23/paper-time-input
         display: block;
         border-radius: 2px;
         transition: all 0.30s ease-out;
-        padding:0 6px 0 6px;
         background-color: white;
       }
 
@@ -158,6 +157,15 @@ Polymer({
       type: String,
       value: ''
     },
+    device_name: {
+      type: String
+    },
+    setting_name: {
+      type: String
+    },
+    attr_name: {
+      type: String
+    },
     min: {
       type: String,
       computed: "getMin(time_value)"
@@ -225,21 +233,35 @@ Polymer({
           }
       }
 
-      const prop = this.item_prop;
-      const subprop = this.item_subprop;
-      const listprop = this.item_listprop;
-      const listindex = this.item_index;
+      let updateObj = {};
 
-      const updateObj = { 
-        'target': prop,
-        'subtarget': (subprop ? subprop : 'value'),
-        'value': newTime.format() 
-      };
-
-      if (listprop)
+      if (this.device_name && this.setting_name && this.attr_name)
       {
-        updateObj.listtarget = listprop;
-        updateObj.listindex = listindex;
+          updateObj = { 
+            'device': this.device_name,
+            'setting': this.setting_name,
+            'attr': this.attr_name,
+            'value': newTime.format() 
+          };
+      }
+      else
+      {
+          const prop = this.item_prop;
+          const subprop = this.item_subprop;
+          const listprop = this.item_listprop;
+          const listindex = this.item_index;
+
+          updateObj = { 
+            'target': prop,
+            'subtarget': (subprop ? subprop : 'value'),
+            'value': newTime.format() 
+          };
+
+          if (listprop)
+          {
+            updateObj.listtarget = listprop;
+            updateObj.listindex = listindex;
+          }
       }
       
       if (this.update_method)
@@ -260,21 +282,35 @@ Polymer({
 
     const newTime = moment().set('hour', hour).set('minute', min);
 
-    const prop = this.item_prop;
-    const subprop = this.item_subprop;
-    const listprop = this.item_listprop;
-    const listindex = this.item_index;
+    let updateObj = {};
 
-    const updateObj = { 
-      'target': prop,
-      'subtarget': (subprop ? subprop : 'value'),
-      'value': newTime.format() 
-    };
-
-    if (listprop)
+    if (this.device_name && this.setting_name && this.attr_name)
     {
-      updateObj.listtarget = listprop;
-      updateObj.listindex = listindex;
+        updateObj = { 
+          'device': this.device_name,
+          'setting': this.setting_name,
+          'attr': this.attr_name,
+          'value': newTime.format() 
+        };
+    }
+    else
+    {
+        const prop = this.item_prop;
+        const subprop = this.item_subprop;
+        const listprop = this.item_listprop;
+        const listindex = this.item_index;
+
+        updateObj = { 
+          'target': prop,
+          'subtarget': (subprop ? subprop : 'value'),
+          'value': newTime.format() 
+        };
+
+        if (listprop)
+        {
+          updateObj.listtarget = listprop;
+          updateObj.listindex = listindex;
+        }
     }
     
     if (this.update_method)

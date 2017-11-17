@@ -1,6 +1,8 @@
 <link rel='import' href='../../bower_components/polymer/polymer.html'>
 <link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
 
 <link rel='import' href='../components/ha-card.html'>
 <link rel="import" href='../components/state-charts-container.html'>
@@ -44,7 +46,7 @@
       }
       .progress-container {
         position: relative;
-        padding: 30px;
+        padding: 30px 30px 10px 30px;
         display: block;
         text-align: center;
       }
@@ -66,14 +68,9 @@
         --paper-tooltip-background: cadetblue;
         --paper-tooltip-opacity: 1;
       }
-/*      .transactive-home {
-        margin-bottom: 100px;
-      }*/
-
       #toast-container > .toast {
         background-image: none !important;
       }
-
       .popup {
         max-width:600px !important;
       }
@@ -82,9 +79,17 @@
         margin-top: 15px;
         padding: 5px;
       }
-/*      .data-chart {
-        display: none
-      }*/
+      .show-hide-chart {
+        width: 100%;
+        text-align: right;
+        position: relative;
+        min-height: 60px;
+      }
+      .show-hide-chart paper-fab {
+        right: 40px;
+        position: absolute;
+        z-index: 2;
+      }
     </style>
     <ha-card class='transactive-home'>
       <div class='header domain'>
@@ -115,12 +120,18 @@
               right_prop="end_point"
             ></ha-progress-scale>
           </div>
-          <paper-button raised on-click = "myFunction" class ="show" id ="showTag">Show More</paper-button>
       </div>
-      <div class='data-chart' hidden$="{{hidden}}">
-        <state-charts-container
-          state-obj="[[stateObj]]">
-        </state-charts-container>
+      <div class="show-hide-chart">
+        <paper-fab
+          mini
+          on-click="showHideChart"
+          icon="more-vert"
+        ></paper-fab>
+        <div class='data-chart' hidden$="{{hidden}}">
+          <state-charts-container
+            state-obj="[[stateObj]]">
+          </state-charts-container>
+        </div>
       </div>
     </ha-card>
   </template>
@@ -143,15 +154,7 @@ Polymer({
       value: true
     }
   },
-  myFunction: function(){
-    if (this.hidden == true){
-      var button = this.$.showTag;
-      button.textContent = "Show Less"
-    }
-    else if (this.hidden == false){
-      var button = this.$.showTag;
-      button.textContent = "Show More"
-    }
+  showHideChart: function() {
     this.hidden = !this.hidden;
   },
 

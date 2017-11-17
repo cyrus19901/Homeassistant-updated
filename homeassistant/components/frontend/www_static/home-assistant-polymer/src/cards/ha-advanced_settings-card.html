@@ -84,17 +84,40 @@
       }
 
       .time-of-use > .units {
-        font-size: 12px;
+        /*font-size: 12px;*/
       }
 
       .time-of-use paper-input {
-          width: 50px;
+          width: 30px;
           font-size: 16px;
           transform: translateY(-10px);
       }
 
       paper-input::shadow paper-input-container {
         padding: 0;
+      }
+      .display-inline {
+        display: block;
+      }
+      .display-inline > * {
+        display: inline-block;
+      }
+      .content paper-icon-button {
+        color: gray;
+      }
+      .settings {
+        padding-left: 10px;
+      }
+      .settings > div {
+        margin-bottom: 10px;
+      }
+      .to-label {
+        height: 60px;
+        width: 30px;
+        text-align: center;
+      }
+      .to-label > div {
+          transform: translateY(10px);
       }
 
     </style>
@@ -104,32 +127,59 @@
         <div class='name'>[[stateObj.attributes.friendly_name]]</div>
       </div>
       <div class='content'>
-        <div class="daily-period">
-          <b>Peak Period</b>
+        <div class="display-inline">
+          <div>
+            <b>Peak Period</b>
+          </div>
+          <paper-icon-button
+            mini 
+            icon="mdi:pencil"
+            data-setting="peak-period"
+            on-click="editSettings"
+          ></i></paper-icon-button>
         </div>
-        <table class="transactive-period">
-          <tr>
-            <td>
-              <vaadin-date-picker 
-                id="time-period-start"
-                data-prop="timePeriodStart"
-                label="Start Date" 
-                value="[[prepDate(stateObj.attributes.timePeriodStart.value)]]"
-              >
-              </vaadin-date-picker>
-            </td>
-            <td>to</td>
-            <td>
-              <vaadin-date-picker
-                id="time-period-end"
-                data-prop="timePeriodEnd" 
-                label="End Date" 
-                value="[[prepDate(stateObj.attributes.timePeriodEnd.value)]]"
-              >
-              </vaadin-date-picker>
-            </td>
-          </tr>
-        </table>
+        <div class="settings">
+          <div class="display-inline">
+            <span>Date Range: </span>
+            <span>[[formatDate(stateObj.attributes.timePeriodStart.value)]]</span>
+            <span>to</span>
+            <span>[[formatDate(stateObj.attributes.timePeriodEnd.value)]]</span>
+          </div>
+          <div class="display-inline">
+            <span>From </span>
+            <span>[[formatTime(stateObj.attributes.savingsStartTime.value)]]</span>
+            <span>to</span>
+            <span>[[formatTime(stateObj.attributes.savingsEndTime.value)]]</span>
+            <span>daily</span>
+          </div>
+          <div class="display-inline">
+            <span>Energy Savings Goal: </span>
+            <span>[[stateObj.attributes.energySavings.value]]</span>
+            <span>[[stateObj.attributes.energySavings.units]]</span>
+          </div>
+        </div>
+      </div>
+      <paper-dialog id="peak-period" class="popup">
+        <h3>Change Peak Period settings</h3>
+        <div class="display-inline">
+          <vaadin-date-picker 
+            id="time-period-start"
+            data-prop="timePeriodStart"
+            label="Start Date" 
+            value="[[prepDate(stateObj.attributes.timePeriodStart.value)]]"
+          >
+          </vaadin-date-picker>
+          <div class="to-label">
+            <div>to</div>
+          </div>
+          <vaadin-date-picker
+            id="time-period-end"
+            data-prop="timePeriodEnd" 
+            label="End Date" 
+            value="[[prepDate(stateObj.attributes.timePeriodEnd.value)]]"
+          >
+          </vaadin-date-picker>
+        </div>
         <div>
           <table>
             <tr>
@@ -171,67 +221,92 @@
             <div>[[stateObj.attributes.energySavings.units]]</div>
           </div>
         </div>
-        <div>
+      </paper-dialog>
+      <div class="content">
+        <div class="display-inline">
           <div>
-            <b>[[stateObj.attributes.time_of_use_pricing.label]]:</b>
+            <b>Time of Use Pricing</b>
           </div>
-          <table>
-            <template 
-              is='dom-repeat' 
-              items="[[getTimeOfUsePrincings(stateObj)]]"
-            >
-              <tr class="time-of-use">
-                <td>
-                  <ha-time-select 
-                    hass="[[hass]]"
-                    state_obj="[[stateObj]]"
-                    update_method="update_advanced_settings"
-                    time_value="[[item.startTime]]"
-                    item_prop="time_of_use_pricing"
-                    item_subprop="list"
-                    item_listprop="startTime"
-                    item_index=[[index]]
-                    item_label=""
-                  ></ha-time-select>
-                </td>
-                <td>to</td>
-                <td>
-                  <ha-time-select 
-                    hass="[[hass]]"
-                    state_obj="[[stateObj]]"
-                    update_method="update_advanced_settings"
-                    time_value="[[item.endTime]]"
-                    item_prop="time_of_use_pricing"
-                    item_subprop="list"
-                    item_listprop="endTime"
-                    item_index=[[index]]
-                    item_label=""
-                  ></ha-time-select>
-                </td>
-                <td>
-                  :
-                </td>
-                <td>
-                  <div class="time-of-use">
-                    <paper-input 
-                      id=[[index]]
-                      label=""
-                      data-prop="time_of_use_pricing" 
-                      data-subprop="list"
-                      data-listprop="value"
-                      type="number"
-                      on-change="updateSetting" 
-                      value="[[item.value]]" 
-                    >
-                    </paper-input>
-                  </div>
-                </td>
-                <td class="units">[[item.units]]</td>
-              </tr>
-            </template>
-          </table>
+          <paper-icon-button
+            mini 
+            icon="mdi:pencil"
+            data-setting="time-of-use"
+            on-click="editSettings"
+          ></i></paper-icon-button>
+        </div>
+        <div class="settings">
+          <template 
+            is='dom-repeat' 
+            items="[[getTimeOfUsePrincings(stateObj)]]"
+          >
+            <div class="display-inline">
+              <span>[[formatTime(item.startTime)]]</span>
+              <span>to</span>
+              <span>[[formatTime(item.endTime)]]</span>
+              <span>: [[item.value]]</span>
+              <span>[[item.units]]</span>
+            </div>
+          </template>
         </div>
       </div>
+      <paper-dialog id="time-of-use" class="popup">
+        <h3>Change Time of Use settings</h3>
+        <table>
+          <template 
+            is='dom-repeat' 
+            items="[[getTimeOfUsePrincings(stateObj)]]"
+          >
+            <tr class="time-of-use">
+              <td>
+                <ha-time-select 
+                  hass="[[hass]]"
+                  state_obj="[[stateObj]]"
+                  update_method="update_advanced_settings"
+                  time_value="[[item.startTime]]"
+                  item_prop="time_of_use_pricing"
+                  item_subprop="list"
+                  item_listprop="startTime"
+                  item_index=[[index]]
+                  item_label=""
+                ></ha-time-select>
+              </td>
+              <td>to</td>
+              <td>
+                <ha-time-select 
+                  hass="[[hass]]"
+                  state_obj="[[stateObj]]"
+                  update_method="update_advanced_settings"
+                  time_value="[[item.endTime]]"
+                  item_prop="time_of_use_pricing"
+                  item_subprop="list"
+                  item_listprop="endTime"
+                  item_index=[[index]]
+                  item_label=""
+                ></ha-time-select>
+              </td>
+              <td>
+                :
+              </td>
+              <td>
+                <div class="time-of-use">
+                  <paper-input 
+                    id=[[index]]
+                    label=""
+                    data-prop="time_of_use_pricing" 
+                    data-subprop="list"
+                    data-listprop="value"
+                    type="number"
+                    on-change="updateSetting" 
+                    value="[[item.value]]" 
+                  >
+                  </paper-input>
+                </div>
+              </td>
+              <td class="units">[[item.units]]</td>
+            </tr>
+          </template>
+        </table>
+      </paper-dialog>
     </ha-card>
   </template>
 </dom-module>
@@ -256,11 +331,25 @@ Polymer({
       type: Object,
     }
   },
+  editSettings: function (ev) {
+    if (ev.target)
+    {
+      const setting = ev.target.dataset.setting;
+      const dialogName = `#${setting}`;
+      this.$$(dialogName).open();
+    }
+  },
   testEvent: function () {
     console.log('test successful');
   },
   prepDate: function (dateToPrep) {
     return moment(dateToPrep).format('YYYY-MM-DD');
+  },
+  formatDate: function (dateToFormat) {
+    return moment(dateToFormat).format('MMM. D, YYYY');
+  },
+  formatTime: function (timeToFormat) {
+    return moment(timeToFormat).format('h:mm A');
   },
   getTimeOfUsePrincings: function (obj) {
     return obj.attributes.time_of_use_pricing.list;

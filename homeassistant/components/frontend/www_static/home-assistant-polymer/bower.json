@@ -17,7 +17,6 @@
     "google-apis": "GoogleWebComponents/google-apis#~2.0.0",
     "iron-autogrow-textarea": "PolymerElements/iron-autogrow-textarea#^2.0.0",
     "iron-flex-layout": "PolymerElements/iron-flex-layout#^2.0.0",
-    "iron-icon": "PolymerElements/iron-icon#^2.0.0",
     "iron-image": "PolymerElements/iron-image#^2.1.1",
     "iron-input": "PolymerElements/iron-input#^2.0.0",
     "iron-media-query": "PolymerElements/iron-media-query#^2.0.0",
@@ -57,7 +56,9 @@
     "paper-time-input": "kpk-paper-time-input#^1.0.5",
     "iron-overlay-behavior": "2.0.0",
     "paper-tabs": "^2.0.0",
-    "web-animations-js": "2.2.2"
+    "web-animations-js": "2.2.2",
+    "iron-menu-behavior": "2.0.0",
+    "iron-icons": "^2.0.1"
   },
   "devDependencies": {
     "web-component-tester": "^6.0.0",
@@ -73,7 +74,7 @@
     "iron-validatable-behavior": "^2.0.0",
     "iron-a11y-announcer": "^2.0.0",
     "iron-form-element-behavior": "^2.0.0",
-    "iron-overlay-behavior": "2.0.0",
+    "iron-overlay-behavior": "^2.0.0",
     "iron-dropdown": "^2.0.0",
     "iron-iconset-svg": "^2.0.0",
     "iron-flex-layout": "^2.0.0",
@@ -88,6 +89,7 @@
     "paper-styles": "^2.0.0",
     "polymer": "^2.0",
     "webcomponentsjs": "^1.0.10",
-    "paper-ripple": "^2.0.0"
+    "paper-ripple": "^2.0.0",
+    "iron-menu-behavior": "2.0.0"
   }
 }

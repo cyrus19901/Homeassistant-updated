@@ -39,14 +39,41 @@ def setup(hass, config):
 
         update_obj = service.data.get('value')
 
+        _LOGGER.info("update_obj: %s", update_obj)
+
+        target_device = update_obj["device"]
+        target_setting = update_obj["setting"]
+        target_attr = update_obj["attr"]
+        update_value = update_obj["value"]
+
         user_settings = hass.states.get('user_settings.user_settings').as_dict()
+
+        _LOGGER.info("updating user settings: %s", user_settings)
         
         attributes = user_settings["attributes"]
 
-        for obj in update_obj:
-            attributes["devices"][obj["device"]][obj["target"]] = obj["value"]
+        _LOGGER.info("updating attributes: %s", attributes)
 
-        user_settings["attributes"] = attributes
+        found_device = attributes["devices"][target_device]
+        _LOGGER.info("found device: %s", found_device)
+
+        for s in found_device["settings"]:
+            if s["name"] == target_setting:
+                found_setting = s
+
+                _LOGGER.info("found setting: %s", found_setting)
+
+                for a in found_setting["attributes"]:
+                    if a["name"] == target_attr:
+                        found_attr = a
+
+                        _LOGGER.info("found attribute: %s", found_attr)
+
+                        found_attr["value"] = update_value
+                        break
+                break
+
+        _LOGGER.info("after update: %s", attributes)
 
         hass.states.set('user_settings.user_settings', 'On', attributes, True)
 
@@ -184,12 +211,14 @@ class UserSettingsComponent(Entity):
                             "type": "list",
                             "attributes": [
                                 {
+                                    "name": "0",
                                     "type": "time",
-                                    "value": "7:00 A.M."
+                                    "value": "2017-10-24T10:00:00-07:00"
                                 },
                                 {
+                                    "name": "1",
                                     "type": "time",
-                                    "value": "9:00 P.M."
+                                    "value": "2017-10-24T17:00:00-07:00"
                                 }
                             ]
                         }           
@@ -205,12 +234,12 @@ class UserSettingsComponent(Entity):
                                 {
                                     "name": "start",
                                     "type": "time",
-                                    "value": "20:00 P.M."
+                                    "value": "2017-10-24T10:00:00-07:00"
                                 },
                                 {
                                     "name": "end",
                                     "type": "time",
-                                    "value": "7:00 A.M."
+                                    "value": "2017-10-24T14:00:00-07:00"
                                 }
                             ]
                         }       

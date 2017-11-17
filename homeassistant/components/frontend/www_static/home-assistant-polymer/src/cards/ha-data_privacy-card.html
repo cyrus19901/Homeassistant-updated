@@ -1,0 +1,125 @@
+<link rel='import' href='../../bower_components/polymer/polymer.html'>
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+
+<link rel='import' href='../components/ha-card.html'>
+
+<dom-module id='ha-data_privacy-card'>
+  <template>
+    <style is="custom-style" include="iron-flex"></style>
+    <style>
+      
+      .header {
+        @apply(--paper-font-headline);
+        /* overwriting line-height +8 because entity-toggle can be 40px height,
+           compensating this with reduced padding */
+        line-height: 40px;
+        color: var(--primary-text-color);
+        padding: 20px 16px 12px;
+      }
+      .header .name {
+        @apply(--paper-font-common-nowrap);
+      }
+      .header.domain .name {
+        /* Capitalize cards titles for default domain groups. */
+        text-transform: capitalize;
+      }
+      .display-inline {
+        display: block;
+      }
+      .display-inline > * {
+        display: inline-block;
+      }
+      tr {
+        cursor: pointer;
+      }
+      .content {
+        padding: 4px 30px 30px;
+      }
+      table {
+        border-collapse: collapse;
+      }
+      td {
+        padding: 10px;
+      }
+      .description {
+        color: dimgray;
+        font-size: 16px;
+        padding-left: 10px;
+        padding-bottom: 10px;
+      }
+      iron-icon {
+        color: green;
+      }
+    </style>
+
+    <ha-card class='data-privacy'>
+      <div class='header domain'>
+        <div class='name'>[[stateObj.attributes.friendly_name]]</div>
+      </div>
+      <div class="content">
+        <div class="description">Choose the privacy setting you want applied to your Connected Homes network.</div>
+        <table>
+          <template is='dom-repeat' items="[[getSettings(stateObj)]]">
+            <tr 
+              data-setting="[[item.key]]"
+              on-click="updateSetting"
+            >
+              <td>
+                <div style$=[[getVisible(item)]]>
+                  <iron-icon icon="mdi:check"></iron-icon>
+                </div>
+              </td>
+              <td>[[item.label]]</td>
+            </tr>
+          </template>
+        </table>
+      </div>
+    </ha-card>
+  </template>
+</dom-module>
+<script>
+Polymer({
+  is: 'ha-data_privacy-card',
+  properties: {
+    hass: {
+      type: Object,
+    },
+    stateObj: {
+      type: Object,
+    }
+  },
+  getSettings: function(obj) {
+      return obj.attributes.privacy_options;
+  },
+  getVisible: function (item) {
+      let style = "visibility: visible";
+
+      if (item.key !== this.stateObj.attributes.privacy_setting)
+      {
+        style = "visibility: hidden";
+      }
+
+      return style;
+  },
+  updateSetting: function (evt) {
+      const newValue = evt.currentTarget.dataSetting;
+
+      const updateObj = { 
+        'value': newValue 
+      };
+        
+      this.callServiceHelper('update_data_privacy', updateObj);
+  },
+  callServiceHelper: function (service, data) {
+    if (this.hass)
+    {      
+      this.hass.callService(this.stateObj._domain, service, { value: data})
+        .then(function () {
+        }.bind(this));
+    }
+  }
+});
+</script>
