@@ -106,7 +106,7 @@
         min-height: 0;
       }
       .device-name-row {
-        margin-top: 20px;
+        transform: translateY(20px);
       }
       .device-name-cell {
         background-color: gainsboro;
@@ -120,6 +120,9 @@
       }
       .space-row {
         height: 10px;
+      }
+      .lower-row {
+        transform: translateY(20px);
       }
     </style>
 
@@ -137,7 +140,7 @@
                   <div class='device-name'><i>[[item.name]]</i></div>
                 </td>
               </tr>
-              <tr>
+              <tr class="lower-row">
                 <td class='participation'></td>
                 <td></td>
                 <td class='flexibility-cell'>
@@ -218,9 +221,6 @@
                     </div>
                   </paper-dialog>
                 </td>
-              </tr>
-              <tr class='space-row'>
-                <td colspan=6></td>
               </tr>
             </template>
           </tbody>

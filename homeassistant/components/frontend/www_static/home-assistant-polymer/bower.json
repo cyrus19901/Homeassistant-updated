@@ -74,7 +74,7 @@
     "iron-validatable-behavior": "^2.0.0",
     "iron-a11y-announcer": "^2.0.0",
     "iron-form-element-behavior": "^2.0.0",
-    "iron-overlay-behavior": "^2.0.0",
+    "iron-overlay-behavior": "^2.2.0",
     "iron-dropdown": "^2.0.0",
     "iron-iconset-svg": "^2.0.0",
     "iron-flex-layout": "^2.0.0",
