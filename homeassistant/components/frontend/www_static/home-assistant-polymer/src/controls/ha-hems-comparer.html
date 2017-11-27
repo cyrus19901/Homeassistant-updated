@@ -62,27 +62,33 @@
       <div></div>
       <div class="hems-comparer">
         <div class="bars-container">
-          <div class="bar">
-            <div>[[estimate_label]]</div>
-            <div
-              class="rect estimate"
-              style="height: [[estimate_height]]px"
-            ></div>
-          </div>
-          <div class="bar">
-            <div>[[goal_label]]</div>
-            <div
-              class="rect goal"
-              style="height: [[goal_height]]px"
-            ></div>
-          </div>
-          <div class="bar">
-            <div>[[actual_label]]</div>
-            <div
-              class="rect actual"
-              style="height: [[actual_height]]px"
-            ></div>
-          </div>
+          <template is="dom-if" if={{estimate_label}}>
+            <div class="bar">
+              <div>[[estimate_label]]</div>
+              <div
+                class="rect estimate"
+                style="height: [[estimate_height]]px"
+              ></div>
+            </div>
+          </template>
+          <template is="dom-if" if={{goal_label}}>
+            <div class="bar">
+              <div>[[goal_label]]</div>
+              <div
+                class="rect goal"
+                style="height: [[goal_height]]px"
+              ></div>
+            </div>
+          </template>
+          <template is="dom-if" if={{actual_label}}>
+            <div class="bar">
+              <div>[[actual_label]]</div>
+              <div
+                class="rect actual"
+                style="height: [[actual_height]]px"
+              ></div>
+            </div>
+          </template>
         </div>
         <div class="item-label">[[item_label]]</div>
       </div>

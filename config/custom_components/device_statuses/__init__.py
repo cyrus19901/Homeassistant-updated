@@ -143,7 +143,7 @@ class DeviceStatusesComponent(Entity):
                         }
                     },
                     "type": "bar",
-                    "label": "energy (Kwh)",
+                    "label": "Energy (kWh)",
                     "id": "device-energy",
                     "updateMethod": "update_chart_type"
                 },
@@ -178,7 +178,7 @@ class DeviceStatusesComponent(Entity):
                         }
                     },
                     "type": "bar",
-                    "label": "power (Kw)",
+                    "label": "Power (kW)",
                     "id": "device-power",
                     "updateMethod": "update_chart_type"
                 }

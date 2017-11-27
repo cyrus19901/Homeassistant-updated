@@ -115,7 +115,7 @@
               right_value="$[[getProgressEnd(stateObj)]]"
               left_value="$[[getProgressStart(stateObj)]]"
               actual_value="$[[getProgressValue(stateObj)]]"
-              description="[[getProgressMessage(stateObj)]]"
+              description="[[progressMessage]]"
               item_prop="progress_bar"
               right_prop="end_point"
             ></ha-progress-scale>
@@ -152,6 +152,20 @@ Polymer({
     hidden:{
       type: Boolean,
       value: true
+    },
+    messageOptions: {
+      type: Array,
+      value: [
+        "You're off to a good start.",
+        "You're making good progress.",
+        "Halfway through, keep up the good work!",
+        "Look at that, you're almost there!",
+        "Congratulations! You reached your goal."
+      ]
+    },
+    progressMessage: {
+      type: String,
+      computed: 'getProgressMessage(stateObj)'
     }
   },
   showHideChart: function() {
@@ -204,27 +218,48 @@ Polymer({
     let message = '';
 
     if (obj.attributes.hasOwnProperty('progress_bar')){
-      const value = obj.attributes.progress_bar.value;
+      const progressBar = obj.attributes.progress_bar;
 
-      if (value <= 25)
-      { 
-        message = "You're off to a good start.";
-      }
-      else if (value <= 50)
+      const value = progressBar.value;
+
+      const min = progressBar.starting_point;
+      const max = +progressBar.end_point;
+      const range = max - min;
+
+      if (range > 0)
       {
-        message = "You're making good progress.";
+        if (value > min)
+        {
+          const zeroScaleValue = value - min;
+
+          const ratio = zeroScaleValue / range;
+
+          const optionsLength = this.messageOptions.length - 1;
+
+          if (ratio >= 1)
+          {
+            message = this.messageOptions[optionsLength];
+          }
+          else
+          {
+            let i;
+            for (i = 0; i <= optionsLength; i++)
+            {
+                if (ratio >= (i / optionsLength))
+                {
+                  message = this.messageOptions[i];
+                }
+            }
+          }
+        }
+        else
+        {
+          message = this.messageOptions[0];
+        }
       }
-      else if (value <= 75)
+      else
       {
-        message = "Halfway through, keep up the good work!";
-      }
-      else if (value == 100)
-      {
-        message = "Congratulations! You reached your goal."
-      }
-      else 
-      {
-        message = "Look at that, you're almost there!"
+        message = "Unable to determine progress: invalid range."
       }
     }
 

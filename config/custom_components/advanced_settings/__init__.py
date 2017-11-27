@@ -113,12 +113,12 @@ class AdvancedSettingsComponent(Entity):
             "energySavings":{
                 "label": "",
                 "value": 11,
-                "units": "Kwh"
+                "units": "kWh"
             },
             "powerSavings": {
                 "label": "",
                 "value": 9,
-                "units": "Kw"
+                "units": "kW"
             },
             "timePeriodStart": {
                 "value": "01/01/2017"

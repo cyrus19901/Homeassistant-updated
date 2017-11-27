@@ -68,6 +68,7 @@
       .toggle-container {
         font-size: 14px;
         padding-left: 10px;
+        height: 40px;
       }
       .color-box {
         height: 10px;
@@ -125,17 +126,19 @@
                 <div class="color-box goal"></div>
               </td>
               <td>
-                goal (from utility)
+                [[getGoalLabel(state_obj)]]
               </td>
             </tr>
-            <tr>
-              <td>
-                <div class="color-box actual"></div>
-              </td>
-              <td>
-                actual (from meter)
-              </td>
-            </tr>
+            <template is="dom-if" if="[[getAttributesFromLabel(state_obj, 'Actual', 'value')]]">
+              <tr>
+                <td>
+                  <div class="color-box actual"></div>
+                </td>
+                <td>
+                  actual (from meter)
+                </td>
+              </tr>
+            </template>
           </tbody>
         </table>
       </div>
@@ -164,13 +167,15 @@
         <span class="dollar-signs">$$</span> for you: <span class="amount">[[getAttributesFromLabel(state_obj, 'Actual', 'value')]]</span>
       </div>
       <div class="toggle-container">
-        <paper-toggle-button raised
-          on-change="useOutlook"
-          checked="[[getAttributes(state_obj, 'useAlgorithm', 'value')]]"
-          data-prop="useAlgorithm"
-        >
-          [[getToggleLabel(state_obj)]]
-        </paper-toggle-button>
+        <template is="dom-if" if="[[state_obj.attributes.canToggle]]">
+          <paper-toggle-button raised
+            on-change="useOutlook"
+            checked="[[getAttributes(state_obj, 'useAlgorithm', 'value')]]"
+            data-prop="useAlgorithm"
+          >
+            [[getToggleLabel(state_obj)]]
+          </paper-toggle-button>
+        </template>
       </div>
     </div>
   </template>
@@ -236,15 +241,37 @@ Polymer({
 
           const energyEfficiency = this.hass.states["energy_efficiency.peak_period_energy_and_compensation"].attributes;
 
-          maxes.push(Number(energyEfficiency.energyReductionActual.value));
-          maxes.push(Number(energyEfficiency.energyReductionEstimate.value));
-          maxes.push(Number(energyEfficiency.energyReductionGoal.value));
+          if (energyEfficiency.energyReductionActual)
+          {
+            maxes.push(Number(energyEfficiency.energyReductionActual.value));
+          }
+
+          if (energyEfficiency.energyReductionEstimate)
+          {
+            maxes.push(Number(energyEfficiency.energyReductionEstimate.value));
+          }
+
+          if (energyEfficiency.energyReductionGoal)
+          {
+            maxes.push(Number(energyEfficiency.energyReductionGoal.value));
+          }
 
           const timeOfUse = this.hass.states["time_of_use.time_of_use_energy_and_savings"].attributes;
 
-          maxes.push(Number(timeOfUse.energyReductionActual.value));
-          maxes.push(Number(timeOfUse.energyReductionEstimate.value));
-          maxes.push(Number(timeOfUse.energyReductionGoal.value));
+          if (timeOfUse.energyReductionActual)
+          {
+            maxes.push(Number(timeOfUse.energyReductionActual.value));
+          }
+
+          if (timeOfUse.energyReductionEstimate)
+          {
+            maxes.push(Number(timeOfUse.energyReductionEstimate.value));
+          }
+          
+          if(timeOfUse.energyReductionGoal)
+          {
+            maxes.push(Number(timeOfUse.energyReductionGoal.value));
+          }
 
           max = Math.max(...maxes);
       }
@@ -260,15 +287,37 @@ Polymer({
 
           const energyEfficiency = this.hass.states["energy_efficiency.peak_period_energy_and_compensation"].attributes;
 
-          maxes.push(Number(this.convertNumber(energyEfficiency.compensationActual.value)));
-          maxes.push(Number(this.convertNumber(energyEfficiency.compensationEstimate.value)));
-          maxes.push(Number(this.convertNumber(energyEfficiency.compensationGoal.value)));
+          if (energyEfficiency.compensationActual)
+          {
+            maxes.push(Number(this.convertNumber(energyEfficiency.compensationActual.value)));
+          }
+
+          if (energyEfficiency.compensationEstimate)
+          {
+            maxes.push(Number(this.convertNumber(energyEfficiency.compensationEstimate.value)));
+          }
+
+          if (energyEfficiency.compensationGoal)
+          {
+            maxes.push(Number(this.convertNumber(energyEfficiency.compensationGoal.value)));
+          }
 
           const timeOfUse = this.hass.states["time_of_use.time_of_use_energy_and_savings"].attributes;
 
-          maxes.push(Number(this.convertNumber(timeOfUse.savingsActual.value)));
-          maxes.push(Number(this.convertNumber(timeOfUse.savingsEstimate.value)));
-          maxes.push(Number(this.convertNumber(timeOfUse.savingsGoal.value)));
+          if (timeOfUse.savingsActual)
+          {
+            maxes.push(Number(this.convertNumber(timeOfUse.savingsActual.value)));
+          }
+
+          if (timeOfUse.savingsEstimate)
+          {
+            maxes.push(Number(this.convertNumber(timeOfUse.savingsEstimate.value)));
+          }
+
+          if (timeOfUse.savingsGoal)
+          {
+            maxes.push(Number(this.convertNumber(timeOfUse.savingsGoal.value)));
+          }
 
           max = Math.max(...maxes);
       }
@@ -288,7 +337,7 @@ Polymer({
       const prop = evt.currentTarget.dataset.prop;
 
       this.updateSetting(checked, prop, this.update_method, this.update_platform);
-      this.updateSetting(!checked, prop, this.other_method, this.other_platform);
+      // this.updateSetting(!checked, prop, this.other_method, this.other_platform);
   },
   getToggleLabel: function (stateObj) {
       let toggleLabel = "";
@@ -304,20 +353,38 @@ Polymer({
   getUseOutlookStyle: function (stateObj) {
       let useOutlookStyle = "";
 
-      if (stateObj)
-      {
-          const useOutlook = stateObj.attributes.useAlgorithm.value;
-          useOutlookStyle = (!useOutlook ? "background-color: lightgray" : '');
-      }
+      // if (stateObj)
+      // {
+      //     const useOutlook = stateObj.attributes.useAlgorithm.value;
+      //     useOutlookStyle = (!useOutlook ? "background-color: lightgray" : '');
+      // }
       
       return useOutlookStyle;
   },
-  getAttributes: function(obj, attr, subattr) {
-    return obj.attributes[attr][subattr];
+  getAttributes: function (obj, attr, subattr) {
+    let value = '';
+
+    if (obj.attributes[attr] && obj.attributes[attr][subattr])
+    {
+      value = obj.attributes[attr][subattr];
+    }
+
+    return value;
   },
-  getAttributesFromLabel: function(obj, attr, subattr) {
+  getAttributesFromLabel: function (obj, attr, subattr) {
+    let value = '';
+
     const fullAttr = this.compensation_or_savings + attr;
-    return obj.attributes[fullAttr][subattr];
+
+    if (obj.attributes[fullAttr] && obj.attributes[fullAttr][subattr])
+    {
+        value = obj.attributes[fullAttr][subattr];
+    }
+    
+    return value;
+  },
+  getGoalLabel: function (obj) {
+      return obj.attributes.goalLegendLabel;
   },
   updateSetting: function (newValue, prop, method, platform) {
       const updateObj = { 

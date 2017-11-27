@@ -105,22 +105,24 @@ class EnergyEfficiencyComponent(Entity):
                 "value": "9",
                 "units": "kwh"
             },
-            "energyReductionActual":{
-                "value": "8",
-                "units": "kwh"
-            },
+            # "energyReductionActual":{
+            #     "value": "8",
+            #     "units": "kwh"
+            # },
             "compensationEstimate":{
                 "value": "$7"
             },
             "compensationGoal":{
                 "value": "$8"
             },
-            "compensationActual":{
-                "value": "$6"
-            },
+            # "compensationActual":{
+            #     "value": "$6"
+            # },
             "useAlgorithm": {
                 "value": True
-            }
+            },
+            "goalLegendLabel": "goal (from utility)",
+            "canToggle": True
         }
 
         return data

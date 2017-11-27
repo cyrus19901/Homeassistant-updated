@@ -103,22 +103,24 @@ class TimeOfUseComponent(Entity):
                 "value": "5",
                 "units": "kwh"
             },
-            "energyReductionActual":{
-                "value": "5",
-                "units": "kwh"
-            },
+            # "energyReductionActual":{
+            #     "value": "5",
+            #     "units": "kwh"
+            # },
             "savingsEstimate":{
                 "value": "$4"
             },
             "savingsGoal":{
                 "value": "$5"
             },
-            "savingsActual":{
-                "value": "$5"
-            },
+            # "savingsActual":{
+            #     "value": "$5"
+            # },
             "useAlgorithm": {
                 "value": False
-            }
+            },
+            "goalLegendLabel": "goal (from customer)",
+            "canToggle": False
         }
 
         return data
