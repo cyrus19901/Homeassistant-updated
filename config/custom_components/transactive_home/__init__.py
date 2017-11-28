@@ -91,10 +91,13 @@ class TransactiveComponent(Entity):
 
         data = {
             "progress_bar": {
-                "message": "Half-way through, keep up the good work!",
+                "message": "You're off to a good start.",
                 "value": 55,
                 "starting_point": 0,
-                "end_point": 80
+                "end_point": 250,
+                "last_year": 1680,
+                "lastYearLabel": "Last year's total energy cost",
+                "comparisonLabel": "savings compared to last year"
             },
             "overallflexibility":[{
                     "flexibility": 10,

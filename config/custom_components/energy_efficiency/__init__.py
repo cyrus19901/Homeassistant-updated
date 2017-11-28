@@ -61,7 +61,7 @@ def setup(hass, config):
         
         _LOGGER.info("after update: %s", attributes[target][subtarget])
 
-        energy_efficiency["attributes"] = attributes
+        # energy_efficiency["attributes"] = attributes
 
         hass.states.set('energy_efficiency.peak_period_energy_and_compensation', 'On', attributes, True)
 
@@ -99,11 +99,11 @@ class EnergyEfficiencyComponent(Entity):
         data = {
             "energyReductionEstimate":{
                 "value": "7",
-                "units": "kwh"
+                "units": "kWh"
             },
             "energyReductionGoal":{
                 "value": "9",
-                "units": "kwh"
+                "units": "kWh"
             },
             # "energyReductionActual":{
             #     "value": "8",

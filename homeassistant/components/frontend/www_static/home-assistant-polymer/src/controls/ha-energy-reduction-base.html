@@ -149,6 +149,7 @@
             estimate_label="[[getAttributes(state_obj, 'energyReductionEstimate', 'value')]]"
             goal_label="[[getAttributes(state_obj, 'energyReductionGoal', 'value')]]"
             actual_label="[[getAttributes(state_obj, 'energyReductionActual', 'value')]]"
+            units_label="[[getAttributes(state_obj, 'energyReductionEstimate', 'units')]]"
             item_label="energy reduction"
             background_style="[[getUseOutlookStyle(state_obj)]]"
             max_value="[[max_reduction]]"
@@ -163,9 +164,11 @@
           ></ha-hems-comparer>
         </div>
       </div>
-      <div class="your-money">
-        <span class="dollar-signs">$$</span> for you: <span class="amount">[[getAttributesFromLabel(state_obj, 'Actual', 'value')]]</span>
-      </div>
+      <template is="dom-if" if="[[getAttributesFromLabel(state_obj, 'Actual', 'value')]]">
+        <div class="your-money">
+          <span class="dollar-signs">$$</span> for you: <span class="amount">[[getAttributesFromLabel(state_obj, 'Actual', 'value')]]</span>
+        </div>
+      </template>
       <div class="toggle-container">
         <template is="dom-if" if="[[state_obj.attributes.canToggle]]">
           <paper-toggle-button raised
@@ -197,11 +200,11 @@ Polymer({
     },
     useLabel: {
       type: String,
-      value: "Use This Outlook"
+      value: "Opting in"
     },
     notUseLabel: {
       type: String,
-      value: "Don't Use This Outlook"
+      value: "Opting out"
     },
     compensation_or_savings: {
       type: String
@@ -364,7 +367,7 @@ Polymer({
   getAttributes: function (obj, attr, subattr) {
     let value = '';
 
-    if (obj.attributes[attr] && obj.attributes[attr][subattr])
+    if (obj.attributes.hasOwnProperty(attr) && obj.attributes[attr].hasOwnProperty(subattr))
     {
       value = obj.attributes[attr][subattr];
     }
@@ -376,7 +379,7 @@ Polymer({
 
     const fullAttr = this.compensation_or_savings + attr;
 
-    if (obj.attributes[fullAttr] && obj.attributes[fullAttr][subattr])
+    if (obj.attributes.hasOwnProperty(fullAttr) && obj.attributes[fullAttr].hasOwnProperty(subattr))
     {
         value = obj.attributes[fullAttr][subattr];
     }

@@ -96,22 +96,22 @@ class TimeOfUseComponent(Entity):
 
         data = {
             "energyReductionEstimate":{
-                "value": "6",
-                "units": "kwh"
+                "value": "10",
+                "units": "kWh"
             },
             "energyReductionGoal":{
-                "value": "5",
-                "units": "kwh"
+                "value": "15",
+                "units": "kWh"
             },
             # "energyReductionActual":{
             #     "value": "5",
             #     "units": "kwh"
             # },
             "savingsEstimate":{
-                "value": "$4"
+                "value": "$1"
             },
             "savingsGoal":{
-                "value": "$5"
+                "value": "$1.50"
             },
             # "savingsActual":{
             #     "value": "$5"

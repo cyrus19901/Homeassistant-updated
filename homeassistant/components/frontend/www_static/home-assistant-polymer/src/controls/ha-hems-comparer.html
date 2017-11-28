@@ -64,7 +64,7 @@
         <div class="bars-container">
           <template is="dom-if" if={{estimate_label}}>
             <div class="bar">
-              <div>[[estimate_label]]</div>
+              <div>[[estimate_label]]&nbsp;[[units_label]]</div>
               <div
                 class="rect estimate"
                 style="height: [[estimate_height]]px"
@@ -73,7 +73,7 @@
           </template>
           <template is="dom-if" if={{goal_label}}>
             <div class="bar">
-              <div>[[goal_label]]</div>
+              <div>[[goal_label]]&nbsp;[[units_label]]</div>
               <div
                 class="rect goal"
                 style="height: [[goal_height]]px"
@@ -82,7 +82,7 @@
           </template>
           <template is="dom-if" if={{actual_label}}>
             <div class="bar">
-              <div>[[actual_label]]</div>
+              <div>[[actual_label]]&nbsp;[[units_label]]</div>
               <div
                 class="rect actual"
                 style="height: [[actual_height]]px"
@@ -117,6 +117,9 @@ Polymer({
       type: Number
     },
     actual_label: {
+      type: String
+    },
+    units_label: {
       type: String
     },
     actual_number: {

@@ -17,14 +17,13 @@
     <style is="custom-style" include="iron-flex"></style>
     <style>
       .state {
-        padding: 4px 16px;
+        padding: 0 16px;
       }
       td, th {
         padding-right: 8px;
       }
       .state .label {
         color: rgba(0, 0, 0, 0.54);
-        text-transform: capitalize;
       }
       .state .value {
         color: rgba(0, 0, 0, 0.87);
@@ -84,18 +83,50 @@
         text-align: right;
         position: relative;
         min-height: 60px;
+        margin-top: 60px;
       }
       .show-hide-chart paper-fab {
         right: 40px;
         position: absolute;
         z-index: 2;
       }
+      .yearly-text {
+        padding-left: 40px;
+        padding-right: 40px;
+      }
+      .yearly-text > div {
+        max-width: 40%;
+      }
+      .yearly-text > div:first-child {
+        float: left;
+        text-align: left;
+      }
+      .yearly-text > div:not(first-child) {
+        float: right;
+        text-align: right;
+        clear: right;
+      }
+      .state th:first-child {
+        height: 1px;
+        border: 1px solid lightgray;
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+      }
     </style>
     <ha-card class='transactive-home'>
       <div class='header domain'>
         <div class='name'>[[stateObj.attributes.friendly_name]]</div>
       </div>
+      <div class='state'>
+        Today (as of now)
+      </div>
       <table class='state'>
+        <thead>
+          <tr>
+            <th colspan=2><th>
+          </tr>
+        </thead>
         <tbody>
           <template is='dom-repeat' items="[[getList(stateObj)]]">
             <tr>
@@ -106,6 +137,9 @@
         </tbody>
       </table>
       <div class='progress-container'>
+          <div>
+            Yearly Savings
+          </div>
           <div class='progress-bar'>
             <ha-progress-scale 
               id="overall-progress"
@@ -120,6 +154,16 @@
               right_prop="end_point"
             ></ha-progress-scale>
           </div>
+      </div>
+      <div class="yearly-text">
+        <div>
+          <span>[[stateObj.attributes.progress_bar.lastYearLabel]]:&nbsp;<span>
+          <span>[[formatMoney(stateObj.attributes.progress_bar.last_year)]]</span>
+        </div>
+        <div>
+          <span>[[getPercentSavings(stateObj)]]%&nbsp;</span>
+          <span>[[stateObj.attributes.progress_bar.comparisonLabel]]</span>
+        </div>
       </div>
       <div class="show-hide-chart">
         <paper-fab
@@ -168,10 +212,22 @@ Polymer({
       computed: 'getProgressMessage(stateObj)'
     }
   },
+  getPercentSavings: function (obj) {
+      const lastYear = obj.attributes.progress_bar.last_year;
+      const goal = obj.attributes.progress_bar.end_point;
+      const percentSavings = Math.round(goal / lastYear * 100);
+
+      return percentSavings;
+  },
   showHideChart: function() {
     this.hidden = !this.hidden;
   },
-
+  formatMoney: function (value) {
+    return value.toLocaleString('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    });
+  },
   getList: function (obj) {
     // this.showToastMessage("Hi, your HVAC isn't in transactive mode for 10 days. Simply turn it back on and start saving energy and money again.");
     // this.showToastMessage("Hi, you'll be on vacation next week. It's a good time to maximize savings. Want to set your house to minimum energy mode?");
