@@ -184,6 +184,7 @@ EVENT_LOGBOOK_ENTRY = 'logbook_entry'
 EVENT_THEMES_UPDATED = 'themes_updated'
 
 # #### STATES ####
+STATE_CIRCULATE = 'circulate'
 STATE_ON = 'on'
 STATE_OFF = 'off'
 STATE_HOME = 'home'
