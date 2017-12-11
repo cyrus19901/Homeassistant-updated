@@ -9,7 +9,7 @@ config/*
 !config/panels
 config/panels/*
 !config/panels/react.html
-
+config/home-assistant_v2.db
 tests/testing_config/deps
 tests/testing_config/home-assistant.log
 
