@@ -96,25 +96,19 @@ class ConnectedDevicesComponent(Entity):
                 "AC1":  {
                     "participate": True,
                     "reset": False,
-                    "zone_min": 0,
-                    "zone_max": 1,
-                    "flexibility": "high",
+                    "flexibility": 1,
                     "name": "Air Conditioner living space"
                 },
                 "AC2": {
                     "participate": True,
                     "reset": False,
-                    "zone_min": 0,
-                    "zone_max": 1,
-                    "flexibility": "low",
+                    "flexibility": 3,
                     "name": "Air Conditioner bedroom"
                 },
                 "WH1": {
                     "participate": True,
                     "reset": False,
-                    "zone_min": 0,
-                    "zone_max": 1,
-                    "flexibility": "low",
+                    "flexibility": 8,
                     "name": "Water Heater"
                 }
             }

@@ -1,7 +1,6 @@
 <link rel='import' href='../../bower_components/polymer/polymer.html'>
 <link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
@@ -80,6 +79,23 @@
       .flexibility-cell {
         position: relative;
       }
+      .flexibility-cell > div:first-child {
+        text-align: center;
+        font-size: 12px;
+      }
+      .high-low {
+        font-size: 10px;
+        line-height: 10px;
+        text-transform: uppercase;
+        color: gray;
+      }
+      .high-low > div:first-child {
+        float: left;
+      }
+      .high-low > div:last-child {
+        float: right;
+        margin-right: 10px;
+      }
       .reset-button {
         background-color: #c74507;
         color: #ebf73c;
@@ -93,18 +109,6 @@
       }
       .display-none {
         display: none;
-      }
-      paper-dropdown-menu::shadow paper-menu-button div.dropdown-trigger paper-input::shadow paper-input-container::shadow .floated-label-placeholder {
-        display: none;
-      }
-      paper-dropdown-menu::shadow paper-menu-button div.dropdown-trigger paper-input::shadow paper-input-container {
-        padding: 0;
-      }
-      paper-listbox {
-        padding: 0;
-      }
-      paper-listbox paper-item {
-        min-height: 0;
       }
       .device-options {
         height: 68px;
@@ -130,7 +134,7 @@
 
     <ha-card class='connected-devices'>
       <div class='header domain'>
-        <div class='name'>[[stateObj.attributes.friendly_name]]</div>
+        <div class='name'>Device Participation</div>
       </div>
       <div class='data-table'>
         <table>
@@ -171,16 +175,20 @@
                   </paper-dialog>
                 </td>
                 <td class="flexibility-cell">
-                  <div class$="[[getDropdown(item.participate)]]">
-                    <ch-dropdown-select
-                      items_list="[[flexibilityOptions]]"
-                      update_method="update_connected_device"
-                      update_platform="connected_devices"
-                      item_target="flexibility"
-                      device="[[item.key]]"
-                      hass="[[hass]]"
-                      selected_value="[[convertFlexibility(item)]]"
-                    ></ch-dropdown-select>
+                  <div>Flexibility</div>
+                  <div class="high-low">
+                    <div>low</div>
+                    <div>high</div>
+                  </div>
+                  <div class="flexibility-slider">
+                    <paper-slider 
+                      data-device="[[item.key]]"
+                      value=[[item.flexibility]]
+                      on-change="changeFlexibility"
+                      min="1"
+                      max="10"
+                      step="1"
+                    ></paper-slider>
                   </div>
                 </td>
                 <td class='reset'>
@@ -346,7 +354,7 @@ Polymer({
 
     const stateDevice = this.stateObj.attributes.devices[device];
 
-    const value = ev.currentTarget.value;
+    const value = ev.target.value;
 
     if (value && value !== stateDevice.flexibility)
     {
