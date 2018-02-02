@@ -1,5 +1,5 @@
 """
-The "whole house energy" component.
+The "whole-house energy" component.
 
 """
 
@@ -25,7 +25,7 @@ DEPENDENCIES = []
 def setup(hass, config):
     """Setup our skeleton component."""
 
-    _LOGGER.info("Whole House Energy loading.")
+    _LOGGER.info("Whole-House Energy loading.")
     
     component = EntityComponent(_LOGGER, DOMAIN, hass, SCAN_INTERVAL)
 
@@ -36,23 +36,34 @@ def setup(hass, config):
 
     def update_whole_house_energy(service):
         """Do any update to the component."""
-        # _LOGGER.info("whole house energy service object: %s", service)
+        # _LOGGER.info("whole-house energy service object: %s", service)
         # _LOGGER.info("what is in here?: %s", hass)
-        
+
         update_obj = service.data.get('value')
 
-        # _LOGGER.info("state attributes: %s", hass.states.get('whole_house_energy.whole_house_energy'))
+        _LOGGER.info("update object: %s", update_obj)
+
+        update_value = update_obj["value"]
+        target = update_obj["target"]
+        subtarget = update_obj["subtarget"]
+
+        _LOGGER.info("before whole_house_energy")
 
         whole_house_energy = hass.states.get('whole_house_energy.whole_house_energy').as_dict()
+
+        _LOGGER.info("after whole_house_energy: %s", whole_house_energy)
+        
         attributes = whole_house_energy["attributes"]
 
-        # _LOGGER.info("writing value: %s", update_obj)
+        _LOGGER.info("before update: %s", attributes[target][subtarget])
 
-        attributes["overallflexibility"][0][update_obj["target"]] = update_obj["value"]
+        attributes[target][subtarget] = update_value
+        
+        _LOGGER.info("after update: %s", attributes[target][subtarget])
 
-        hass.states.set('whole_house_energy.whole_house_energy', State.from_dict(whole_house_energy), attributes, True)
+        # whole_house_energy["attributes"] = attributes
 
-        _LOGGER.info("whole house energy after update: %s", hass.states.get('whole_house_energy.whole_house_energy'))
+        hass.states.set('whole_house_energy.whole_house_energy', 'connected_homes', attributes, True)
 
     hass.services.register(
         DOMAIN,
@@ -64,43 +75,61 @@ def setup(hass, config):
 
 
 class WholeHouseEnergyComponent(Entity):
-    """Representation of a Sensor."""
+    """Representation of a Component."""
 
     def __init__(self):
-        """Initialize the sensor."""
+        """Initialize the component."""
 
         _LOGGER.info("WholeHouseEnergyPlatform loading.")
 
     @property
     def name(self):
-        """Return the name of the sensor."""
-        return 'Whole House Energy'
+        """Return the name of the component."""
+        return 'Whole-House Energy'
 
     @property
     def state(self):
-        """Camera state."""
+        """Component state."""
         return 'happy'
-
-    @property
-    def overall_reduction(self):
-        """Return the name of the sensor."""
-        return 84
 
     @property
     def state_attributes(self):
         """Return the optional state attributes."""
 
         data = {
-            "energyUse":{
-                "maximum": "11",
-                "minimum": "0",
-                "transactive": "5"
+            "ppReductionEstimate":{
+                "value": "7",
+                "units": "kWh"
             },
-            "energyCost":{
-                "maximum": "$50.00",
-                "minimum": "$0",
-                "transactive": "$8.75"
-            }
+            "ppReductionGoal":{
+                "value": "9",
+                "units": "kWh"
+            },
+            "touReductionEstimate":{
+                "value": "10",
+                "units": "kWh"
+            },
+            "touReductionGoal":{
+                "value": "15",
+                "units": "kWh"
+            },
+            "ppBenefitEstimate":{
+                "value": "$0.70"
+            },
+            "ppBenefitGoal":{
+                "value": "$0.90"
+            },
+            "touBenefitEstimate":{
+                "value": "$1"
+            },
+            "touBenefitGoal":{
+                "value": "$1.50"
+            },
+            "useAlgorithm": {
+                "value": True
+            },
+            "goalLegendLabel": "goal (from utility)",
+            "canToggle": True
         }
 
         return data

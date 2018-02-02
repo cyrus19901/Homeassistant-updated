@@ -1,0 +1,160 @@
+<link rel='import' href='../../bower_components/polymer/polymer.html'>
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+
+<link rel='import' href='../components/ha-card.html'>
+
+<dom-module id='ch-extras-card'>
+  <template>
+    <style is="custom-style" include="iron-flex"></style>
+    <style>
+      :host {
+        display: inline-block;
+      }
+      .extras {
+        margin-bottom: 10px;
+        margin-right: 10px;
+        position: relative;
+        width: 200px;
+        height: 200px;
+        float: left;
+      }
+      .extras:hover {
+        box-shadow: 
+          0 8px 10px -5px rgba(0,0,0,.2), 
+          0 8px 24px 2px rgba(0,0,0,.14), 
+          0 6px 30px 5px rgba(0,0,0,.12);
+
+        cursor: pointer;
+      }
+      .extras.pink {
+        background-color: var(--paper-pink-300);
+      }
+      .extras.teal {
+        background-color: var(--paper-teal-300);
+      }
+      .extras.orange {
+        background-color: var(--paper-orange-300);
+      }
+      .extras.yellow {
+        background-color: var(--paper-yellow-300);
+      }
+      .header {
+        @apply(--paper-font-headline);
+        line-height: 40px;
+        color: var(--primary-text-color);
+        padding: 20px 16px 12px;
+      }
+      .header .name {
+        @apply(--paper-font-common-nowrap);
+      }
+      .header.domain .name {
+        text-transform: capitalize;
+      }
+      .display-inline {
+        display: block;
+      }
+      .display-inline > * {
+        display: inline-block;
+      }
+      .content {
+        padding: 15px 30px 10px;
+      }
+      .action-button {
+        margin-top: 20px;
+      }
+      .item-image-url,
+      .item-image {
+        height: 70px;
+        width: 70px;
+        float: right;
+      }
+      .item-image {
+        background-position: center center;
+        background-size: contain;
+        background-repeat: no-repeat;
+      }
+      .name-link {
+        margin-top: 30px;
+        margin-left: 20px;
+        font-size: 16px;
+      }
+    </style>
+
+    <template is='dom-repeat' items="[[getExtras(stateObj)]]">
+      <template is='dom-if' if="[[item.enabled]]">
+        <a 
+          data-location="[[item.url]]"
+          on-click="goTo"
+          class='name'>
+          <ha-card class$='extras [[item.color]]'>
+            <div class='name-link'>
+              [[item.name]]
+            </div>
+            <div class="content">
+              <template is='dom-if' if='[[item.image_url]]'>
+                <img 
+                  class="item-image-url"
+                  src="[[item.image_url]]"
+                ></img>
+              </template>
+              <template is='dom-if' if='[[item.image]]'>
+                <div 
+                  class="item-image"
+                  style="background-image: url(/static/images/connected_homes/[[item.image]])"
+                ></div>
+              </template>
+              [[item.description]]
+            </div>
+            
+          </ha-card>
+        </a>
+      </template>
+    </template>
+  </template>
+</dom-module>
+<script>
+Polymer({
+  is: 'ch-extras-card',
+  properties: {
+    hass: {
+      type: Object,
+    },
+    stateObj: {
+      type: Object,
+    }
+  },
+  getExtras: function(obj) {
+      return obj.attributes.extra_items;
+  },
+  goTo: function (evt) {
+      let url = evt.currentTarget.dataLocation;
+      
+      if (url.indexOf("https://") < 0)
+      {
+          url = "https://" + url;
+      }
+
+      window.open(url, "_blank");
+  },
+  updateSetting: function (evt) {
+      const newValue = evt.currentTarget.dataSetting;
+
+      const updateObj = { 
+        'value': newValue 
+      };
+        
+      this.callServiceHelper('update_data_privacy', updateObj);
+  },
+  callServiceHelper: function (service, data) {
+    if (this.hass)
+    {      
+      this.hass.callService(this.stateObj._domain, service, { value: data})
+        .then(function () {
+        }.bind(this));
+    }
+  }
+});
+</script>

@@ -1,0 +1,12 @@
+
+update_shortcut_adder:
+  description: Add and remove shortcuts
+
+  fields:
+    device:
+      description: Name of setting to change
+      example: 'device1'
+
+    obj:
+      description: An object containing the value
+      example: 'obj.value'

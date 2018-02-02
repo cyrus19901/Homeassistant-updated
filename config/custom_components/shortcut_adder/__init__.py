@@ -1,5 +1,5 @@
 """
-The "data privacy" component.
+The "shortcut adder" component.
 
 """
 
@@ -16,7 +16,7 @@ from homeassistant.core import State
 
 _LOGGER = logging.getLogger(__name__)
 
-DOMAIN = "data_privacy"
+DOMAIN = "shortcut_adder"
 FROM = "from"
 SCAN_INTERVAL = timedelta(3600)
 
@@ -25,7 +25,7 @@ DEPENDENCIES = []
 def setup(hass, config):
     """Setup our skeleton component."""
 
-    _LOGGER.info("Data Privacy loading.")
+    _LOGGER.info("shortcut adder loading.")
     
     component = EntityComponent(_LOGGER, DOMAIN, hass, SCAN_INTERVAL)
 
@@ -34,8 +34,8 @@ def setup(hass, config):
     descriptions = load_yaml_config_file(
         os.path.join(os.path.dirname(__file__), 'services.yaml'))
 
-    def update_data_privacy(service):
-        """Update the data privacy setting."""
+    def update_shortcut_adder(service):
+        """Update the shortcut adder setting."""
 
         update_obj = service.data.get('value')
 
@@ -43,44 +43,44 @@ def setup(hass, config):
 
         update_value = update_obj["value"]
 
-        data_privacy = hass.states.get('data_privacy.data_privacy').as_dict()
+        shortcut_adder = hass.states.get('shortcut_adder.shortcut_adder').as_dict()
 
-        attributes = data_privacy["attributes"]
+        attributes = shortcut_adder["attributes"]
 
         _LOGGER.info("before update: %s", attributes)
         _LOGGER.info("update value: %s", update_value)
 
-        attributes["privacy_setting"] = update_value
+        attributes["added_shortcuts"] = update_value
 
         _LOGGER.info("after update: %s", attributes)
 
-        hass.states.set('data_privacy.data_privacy', 'connected_homes', attributes, True)
+        hass.states.set('shortcut_adder.shortcut_adder', 'connected_homes', attributes, True)
 
     hass.services.register(
         DOMAIN,
-        'update_data_privacy',
-        update_data_privacy,
-        descriptions['update_data_privacy'])
+        'update_shortcut_adder',
+        update_shortcut_adder,
+        descriptions['update_shortcut_adder'])
 
     return True
 
 
-class DataPrivacyComponent(Entity):
+class ShortcutAdderComponent(Entity):
     """Representation of a Sensor."""
 
     def __init__(self):
         """Initialize the sensor."""
 
-        _LOGGER.info("DataPrivacyPlatform loading.")
+        _LOGGER.info("ShortcutAdderPlatform loading.")
 
     @property
     def name(self):
         """Return the name of the sensor."""
-        return 'Data Privacy'
+        return 'shortcut adder'
 
     @property
     def state(self):
-        """Data privacy state."""
+        """shortcut adder state."""
         return 'happy'
 
     @property
@@ -88,21 +88,7 @@ class DataPrivacyComponent(Entity):
         """Return the optional state attributes."""
 
         data = {
-            "privacy_setting": "no_external",
-            "privacy_options": [
-                { 
-                    "key": "no_external",
-                    "label": "No external connections allowed. (most private)"
-                },
-                { 
-                    "key": "vendor_updates",
-                    "label": "Allow vendors to update your devices, but not share your data."
-                },
-                { 
-                    "key": "allow_control",
-                    "label": "Allow technicians and utilities to control devices for remote setup, diagnostics, and override. (least private)"
-                }
-            ]
+            "added_shortcuts": []
         }
 
         return data

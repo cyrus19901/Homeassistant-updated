@@ -1,0 +1,522 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-material/paper-material.html">
+<script src="http://d3js.org/d3.v4.js"></script>
+<script src="../../bower_components/moment/min/moment.min.js"></script>
+
+<dom-module id="ch-bar-chart">
+
+  <template>
+    <style include="paper-material">
+        .chart-container {
+          padding: 20px;
+          position: relative;
+        }
+
+        .line {
+          fill: none;
+          stroke: steelblue;
+          stroke-width: 2px;
+        }
+    </style>
+    <div id="chart" class="chart-container">
+      <div id="outerlegend">
+         <div class="innerlegend"></div>
+      </div>
+      <div id="chartWrapper">
+          <svg id="svg"></svg>
+      </div>
+    </div>
+
+  </template>
+
+</dom-module>
+
+<script>
+(function () {
+  'use strict';
+
+  Polymer({
+    is: 'ch-bar-chart',
+
+    properties: {
+      hass: {
+        type: Object,
+      },
+      chartLabel: {
+        type: String,
+        value: ""
+      },
+      chartId: {
+        type: String,
+        value: ""
+      },
+      componentName: {
+        type: String,
+        value: ""
+      },
+      updateMethod: {
+        type: String,
+        value: ""
+      },
+      xAxisLabel: {
+        type: String,
+      },
+      yAxisLabel: {
+        type: String,
+      },
+      chartData: {
+        type: Object,
+        value: {},
+        observer: 'dataChanged'
+      },
+      cardWidth: {
+        type: Number,
+        value: 400
+      },
+      aggregation: {
+        type: Boolean,
+        value: false
+      }
+    },
+    ready: function() {
+      // this.setUpChart();
+    },
+    setDimensions: function () {
+      this.margin = {top: 20, right: 80, bottom: 40, left: 20};
+      this.chartWidth = this.cardWidth - this.margin.left - this.margin.right;
+      this.chartHeight = 300;
+    },
+    dataChanged: function (chartData) {
+
+      if (chartData)
+      { 
+        const series = Object.keys(chartData.series);
+        this.updateBarChart(this.extractBarData(chartData), series, chartData.series);
+      }
+    },
+    getDateInfo: function (data, xDate) {
+        const d = data.find((datum) => (
+            moment(datum.date).format('MM/DD') === xDate
+        ));
+        
+        return (typeof d !== 'undefined' ? d : null);
+    },
+    getTooltipMessage: function (xDate, d) {
+        let messageInfo = '';
+
+        if (typeof d !== 'undefined')
+        {
+            messageInfo = "<br/>historical: " + d.display.historical + "<br/>transactive: " + d.display.transactive;
+
+            if (d.actual !== null)
+            {
+                messageInfo = messageInfo + "<br/>actual: " + d.display.actual;
+            }
+        }
+
+        return ("Outlook of " + xDate + "<br/>Energy use: 50 kWh<br/>Energy cost: $5<br/>Energy savings: $2" + "<br/>" + messageInfo);
+    },
+    updateData: function (chartSeries, timeperiod) {
+
+      const newTime = moment(chartSeries.times[9]).add(1, timeperiod).toDate();
+
+      console.log(newTime);
+
+      const newSeries = chartSeries;
+
+      newSeries.times.shift();
+      newSeries.times.push(newTime);
+
+      Object.keys(newSeries.series).forEach((key, index) => {
+        const newValue = newSeries.series[key].points[9] + index;
+        newSeries.series[key].points.shift();
+        newSeries.series[key].points.push(newValue);
+      });
+
+      return newSeries;
+    },
+    dataGenerator: function(chartData) {
+
+      const that = this;
+
+      setTimeout(function() {
+          console.log("timer");
+           
+          that.dataChanged(chartData);
+
+          // do forever
+          // that.dataGenerator();
+        }, 2000);
+
+    },
+    setUpBarChart: function (data, series, chartInfo) {
+
+      this.setDimensions();
+
+      var svg = d3.select(this.$.svg)
+          .attr("width", this.chartWidth + this.margin.left + this.margin.right)
+          .attr("height", this.chartHeight + this.margin.top + this.margin.bottom)
+        .append("g")
+          .attr("class", "svg-g")
+          .attr("transform",
+                "translate(40," + this.margin.top + ")");
+
+      this.barX = d3.scaleBand()
+          .rangeRound([0, this.chartWidth]);
+
+      this.barY = d3.scaleLinear()
+          .rangeRound([this.chartHeight, 0]);
+
+      this.barZ = d3.scaleOrdinal(d3.schemeCategory20);
+
+      var stack = d3.stack()
+          .keys(series)
+          .order(d3.stackOrderNone)
+          .offset(d3.stackOffsetNone);
+
+      var layers = stack(data);
+
+      this.barX.domain(layers[0].map(function(d) { 
+        return d.data.date; 
+      }));
+
+      this.barY.domain([0, d3.max(layers[layers.length - 1], function(d) { 
+        return d3.max([d[0], d[1]]); 
+      })]).nice();
+
+      var xAxis = d3.axisBottom(this.barX).tickFormat(d3.timeFormat("%H:%M"));
+
+      // var yAxis = d3.axisRight(y);
+      var yAxis = d3.axisLeft(this.barY)
+          .scale(this.barY);
+          
+      svg.append("g")
+          .attr("class", "axis x-axis")
+          .attr("transform", "translate(0," + this.chartHeight + ")")
+          .call(xAxis);
+
+      svg.append("g")
+          .attr("class", "axis y-axis")
+          .attr("transform", "translate(0,0)")
+          .call(yAxis);
+
+      this.addLegend(series, chartInfo);
+    },
+    updateBarChart: function (data, series, chartInfo) {
+
+      if (typeof this.barX !== 'function')
+      {
+        this.setUpBarChart(data, series, chartInfo);
+      }  
+
+      var svg = d3.select(this.$.svg).select('.svg-g');
+
+      var stack = d3.stack()
+          .keys(series)
+          .order(d3.stackOrderNone)
+          .offset(d3.stackOffsetNone);
+
+      var layers = stack(data);
+
+      this.barX.domain(layers[0].map(function(d) { 
+        return d.data.date; 
+      }));
+
+      this.barY.domain([0, d3.max(layers[layers.length - 1], function(d) { 
+        return d3.max([d[0], d[1]]); 
+      })]).nice();
+
+      var xAxis = d3.axisBottom(this.barX).tickFormat(d3.timeFormat("%H:%M"));
+
+      // var yAxis = d3.axisRight(y);
+      var yAxis = d3.axisLeft(this.barY)
+          .scale(this.barY);
+
+      // Add the X Axis
+      svg.selectAll(".x-axis")
+          .call(xAxis);
+
+      // text label for the x axis
+      svg.append("text")             
+          .attr("transform",
+                "translate(" + (this.chartWidth / 2) + " ," + (this.chartHeight + this.margin.top + 20) + ")")
+          .style("text-anchor", "middle")
+          .text(this.xAxisLabel);
+
+
+      // Add the Y Axis
+      svg.selectAll(".y-axis")
+          .call(yAxis);
+
+      // text label for the y axis
+      svg.append("text")
+          .attr("transform", "rotate(-90)")
+          .attr("y", 0 - (this.margin.left + 20))
+          .attr("x",0 - (this.chartHeight / 2))
+          .attr("dy", "1em")
+          .style("text-anchor", "middle")
+          .text(this.yAxisLabel);
+
+      const that = this;
+
+      svg.selectAll(".layer").remove();
+
+      var layer = svg.selectAll(".layer")
+          .data(layers)
+          .enter().append("g")
+          .attr("class", "layer")
+          .style("fill", function(d, i) {
+            return that.barZ(i); 
+          });
+
+      const rects = layer.selectAll("rect")
+          .data(function(d) { 
+            return d; 
+          })
+          .enter().append("rect")
+          .attr("x", function(d) { 
+            return that.barX(d.data.date); 
+          })
+          .attr("y", function(d) { 
+            return that.barY(d[1]); 
+          })
+          .attr("height", function(d) { 
+            return that.barY(d[0]) - that.barY(d[1]); 
+          })
+          .attr("width", this.barX.bandwidth() - 1);
+      
+      // if (this.chartData)
+      // {
+      //   this.chartData = this.updateData(this.chartData, 'minutes');
+      // }
+      
+      // this.dataGenerator(this.chartData);
+    },
+    addLegend: function (series, chartInfo) {
+      var lwidth = 500;
+      var lheight = series.length * 20;
+      var svgh = 20;
+
+      var svgLegend = d3.select(this.$.outerlegend)
+          .append("svg")
+          .attr("width", lwidth)
+          .attr("height", lheight)
+          .attr("transform", "translate(50,20)");
+      
+      var dataL = 0;
+      var offset = 80;
+      
+      var legend = svgLegend.selectAll('.innerlegend')
+          .data(series)
+          .enter().append('g')
+          .attr("class", "legend")
+          .attr("transform", function (d, i) {
+              if (i === 0) {
+                  dataL = d.length + offset; 
+                  return "translate(0,0)";
+              } 
+              else 
+              { 
+                  var newdataL = dataL;
+                  dataL +=  d.length + offset;
+                  return "translate(0," + (14 * i) + ")";
+              }
+          });
+      
+      var z = d3.scaleOrdinal(d3.schemeCategory20);
+
+      let swatchHeight = 2;
+      let swatchWidth = 16;
+      let swatchY = 4;
+      
+      swatchHeight = 10;
+      swatchWidth = 10;
+      swatchY = 0;
+
+      legend.append('rect')
+          .attr("x", 0)
+          .attr("y", swatchY)
+          .attr("width", 10)
+          .attr("height", swatchHeight)
+          .style("fill", function (d, i) {
+
+              const color = (
+                  chartInfo[series[i]].color ? 
+                  chartInfo[series[i]].color : 
+                  z(i)
+              );
+
+              return color;
+          });
+      
+      legend.append('text')
+          .attr("x", swatchWidth + 4)
+          .attr("y", 10)
+          .text(function (d, i) {
+              return chartInfo[series[i]].name;
+          })
+          .attr("class", "textselected")
+          .style("text-anchor", "start")
+          .style("font-size", 15);
+    },
+    refreshChart: function () {
+      var me = this;
+
+      me.g.data(me.pie(me.data))
+          .select("path").attr("d", me.arc);
+
+      me.g.select("text")
+          .attr("transform", function(d) { 
+              console.log("d: " + d);
+              console.log("translate(" + me.arc.centroid(d) + ")");
+              return "translate(" + me.arc.centroid(d) + ")"; 
+          });
+    },
+    extractData: function (chartData) {
+      const totals = {};
+
+      if (this.aggregation)
+      {
+          Object.keys(chartData.series).forEach((key) => {
+              totals[key] = 0;
+          });
+      }
+
+      const data = chartData.times.map((t, index) => {
+          const item = {
+            date: moment(t).toDate(),
+            display: {}
+          };
+
+          Object.keys(chartData.series).forEach((key) => {
+            item[key] = null;
+
+            if (chartData.series[key].hasOwnProperty('points'))
+            { 
+              if (chartData.series[key]['points'][index])
+              {
+                item[key] = chartData.series[key]['points'][index];
+
+                item.display[key] = item[key];
+
+                if (this.aggregation)
+                {
+                  totals[key] = totals[key] + item[key];
+
+                  item[key] = totals[key];
+                }
+              }
+            }
+          });
+
+          return item;
+      });
+
+      return data;
+    },
+
+    extractBarData: function (chartData) {
+      const totals = {};
+
+      if (this.aggregation)
+      {
+          Object.keys(chartData.series).forEach((key) => {
+              totals[key] = 0;
+          });
+      }
+
+      const data = chartData.times.map((t, index) => {
+          const item = {
+            date: moment(t).toDate(),
+            display: {}
+          };
+
+          Object.keys(chartData.series).forEach((key) => {
+            item[key] = null;
+
+            if (chartData.series[key].hasOwnProperty('points'))
+            { 
+              if (chartData.series[key]['points'][index])
+              {
+                item[key] = chartData.series[key]['points'][index];
+
+                item.display[key] = item[key];
+
+                if (this.aggregation)
+                {
+                  totals[key] = totals[key] + item[key];
+
+                  item[key] = totals[key];
+                }
+              }
+            }
+          });
+
+          return item;
+      });
+
+      if (data.length < 10)
+      {
+        let lastTime = data[data.length - 1].date;
+
+        let i;
+
+        for (i = 0; i < 10 - data.length; i++)
+        {
+          const lastMoment = moment(lastTime);
+        
+          lastTime = lastMoment.add(chartData.step, 's').toDate();
+          const blankItem = {
+            date: lastTime,
+            display: {}
+          };
+
+          Object.keys(chartData.series).forEach((key) => {
+            blankItem[key] = null;
+          });
+
+          data.push(blankItem);
+        }
+      }
+
+      return data;
+    },
+    created: function () {
+      this.style.display = 'block';
+    },
+    colorMap: function (index) {
+      
+      const colors = [
+        '#29A6FF', // Celestine +1
+        '#E87511', // Carnelian
+
+        '#46A661', // Olivine
+        '#00AFAA', // Malachite
+        '#EA82FF', // Fluorite +1
+
+        '#FF6B70', // Cinnabar +1
+
+        '#00BDDD', // Zircon +1
+        '#AFA1FF', // Amethyst +1
+        '#F5EC5A', // Topaz
+
+        '#8CCD5A', // Peridot
+        '#FFBA59', // Citrine
+        '#BF2A75', // Tourmaline
+      ];
+
+      const safeIndex = (colors.length - 1) % (index + 1);
+
+      return colors[safeIndex];
+    },
+    callServiceHelper: function (service, data) {
+      if (this.hass && this.componentName)
+      {      
+        this.hass.callService(this.componentName, service, { value: data})
+          .then(function () {
+          }.bind(this));
+      }
+    },
+  });
+}());
+</script>

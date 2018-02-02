@@ -18,20 +18,20 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 
 
 class TimeOfUsePlatform(TimeOfUseComponent):
-    """Representation of a demo climate device."""
+    """Representation of the time of use platform."""
 
     def __init__(self):
-        """Initialize the climate device."""
-        self._state = 'On'
+        """Initialize the platform."""
+        self._state = 'connected_homes'
 
     @property
     def state(self):
-        """Return the state of the sensor."""
+        """Return the state of the platform."""
         return self._state
 
     @property
     def name(self):
-        """Return the name of the sensor."""
+        """Return the name of the platform."""
         return 'Time of use energy and savings'
 
     def set_time_of_use(self: TimeOfUseComponent, new_value):

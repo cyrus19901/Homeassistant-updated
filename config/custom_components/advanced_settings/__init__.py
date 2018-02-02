@@ -41,7 +41,7 @@ def setup(hass, config):
 
         _LOGGER.info("update object: %s", update_obj)
 
-        advanced_settings = hass.states.get('advanced_settings.advanced_settings').as_dict()
+        advanced_settings = hass.states.get('advanced_settings.utility_settings').as_dict()
         attributes = advanced_settings["attributes"]
 
         update_value = update_obj["value"]
@@ -74,9 +74,9 @@ def setup(hass, config):
         else:
             attributes[target] = update_value
 
-        hass.states.set('advanced_settings.advanced_settings', 'On', attributes, True)
+        hass.states.set('advanced_settings.utility_settings', 'connected_homes', attributes, True)
 
-        _LOGGER.info("advanced settings after update: %s", hass.states.get('advanced_settings.advanced_settings'))
+        _LOGGER.info("advanced settings after update: %s", hass.states.get('advanced_settings.utility_settings'))
 
     hass.services.register(
         DOMAIN,
@@ -144,19 +144,19 @@ class AdvancedSettingsComponent(Entity):
                         "startTime": "2017-10-24T10:00:00-07:00",
                         "endTime": "2017-10-24T14:00:00-07:00",
                         "value": 15,
-                        "units": "cents per"
+                        "units": "cents per kWh"
                     },
                     {
                         "startTime": "2017-10-24T14:00:00-07:00",
                         "endTime": "2017-10-24T20:00:00-07:00",
                         "value": 35,
-                        "units": "cents per"
+                        "units": "cents per kWh"
                     },
                     {
                         "startTime": "2017-10-24T20:00:00-07:00",
                         "endTime": "2017-10-24T09:00:00-07:00",
                         "value": 10,
-                        "units": "cents per"
+                        "units": "cents per kWh"
                     },
                 ]
             }

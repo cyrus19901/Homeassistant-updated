@@ -7,8 +7,9 @@
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 
 <link rel='import' href='../components/ha-card.html'>
+<link rel='import' href='../controls/ch-dropdown-select.html'>
 
-<dom-module id='ha-connected_devices-card'>
+<dom-module id='ch-connected_devices-card'>
   <template>
     <style is="custom-style" include="iron-flex"></style>
     <style>
@@ -105,8 +106,8 @@
       paper-listbox paper-item {
         min-height: 0;
       }
-      .device-name-row {
-        transform: translateY(20px);
+      .device-options {
+        height: 68px;
       }
       .device-name-cell {
         background-color: gainsboro;
@@ -134,23 +135,13 @@
       <div class='data-table'>
         <table>
           <tbody>
-            <!-- <template is='dom-repeat' items="[[getFakeDevices()]]"> -->
             <template is='dom-repeat' items="[[getDataDevices(stateObj)]]">
               <tr class='device-name-row'>
                 <td class='device-name-cell' colspan=6>
                   <div class='device-name'><i>[[item.name]]</i></div>
                 </td>
               </tr>
-              <tr class="lower-row">
-                <td class='participation'></td>
-                <td></td>
-                <td class='flexibility-cell'>
-                  <div class$="column-name [[getDropdown(item.participate)]]">
-                    Flexibility
-                  </div>
-                </td>
-              </tr>
-              <tr>
+              <tr class="device-options">
                 <td class='indicator'>
                   <div class='cell'>
                     <div class$="[[getParticipation(item.participate)]]"></div>
@@ -159,12 +150,12 @@
                 <td>
                   <div>
                     <paper-toggle-button raised
-                      data-device="[[item.name]]"
+                      data-device="[[item.key]]"
                       on-change="transactiveChanged"
                       checked="[[item.participate]]">
                     </paper-toggle-button>
                   </div>
-                  <paper-dialog id="toggle-[[item.name]]" class="popup">
+                  <paper-dialog id="toggle-[[item.key]]" class="popup">
                     <h2>Turn Off Transactive Mode</h2>
                     <p>Device <b>[[item.name]]</b> will be removed from the transactive control network until you reactivate its transactive mode.
                     </p> 
@@ -172,7 +163,7 @@
                     <div class="buttons">
                       <paper-button dialog-dismiss>No</paper-button>
                       <paper-button 
-                        data-device="[[item.name]]"
+                        data-device="[[item.key]]"
                         dialog-confirm 
                         autofocus
                         on-click="turnTransactiveOff">Yes</paper-button>
@@ -181,19 +172,15 @@
                 </td>
                 <td class="flexibility-cell">
                   <div class$="[[getDropdown(item.participate)]]">
-                    <paper-dropdown-menu 
-                      noLabelFloat
-                      data-device="[[item.name]]"
-                      on-iron-select="changeFlexibility">
-                      <paper-listbox 
-                        slot="dropdown-content" 
-                        class="dropdown-content"
-                        selected="[[convertFlexibility(item)]]">
-                        <paper-item>high</paper-item>
-                        <paper-item>medium</paper-item>
-                        <paper-item>low</paper-item>
-                      </paper-listbox>
-                    </paper-dropdown-menu>
+                    <ch-dropdown-select
+                      items_list="[[flexibilityOptions]]"
+                      update_method="update_connected_device"
+                      update_platform="connected_devices"
+                      item_target="flexibility"
+                      device="[[item.key]]"
+                      hass="[[hass]]"
+                      selected_value="[[convertFlexibility(item)]]"
+                    ></ch-dropdown-select>
                   </div>
                 </td>
                 <td class='reset'>
@@ -201,22 +188,22 @@
                     <paper-button
                       on-click="confirmReset"
                       class='reset-button'
-                      data-device="[[item.name]]"
+                      data-device="[[item.key]]"
                       data-reset="[[item.reset]]"
                       raised
                       disabled="[[item.reset]]"
                     >24-hr Opt Out</paper-button>
                   </div>
-                  <paper-dialog id="reset-[[item.name]]" class="popup">
+                  <paper-dialog id="reset-[[item.key]]" class="popup">
                     <h2>Reset Device</h2>
                     <p>Device <b>[[item.name]]</b> will be temporarily removed from the transactive control network. It will be automatically added back in when the next peak period occurs, which is usually next afternoon or early evening.</p>
-                    <p>Proceed with the temporary reset?</p>
+                    <p>Proceed with the temporary opt-out?</p>
                     <div class="buttons">
                       <paper-button dialog-dismiss>No</paper-button>
                       <paper-button 
                         dialog-confirm 
                         autofocus
-                        data-device="[[item.name]]"
+                        data-device="[[item.key]]"
                         on-click="doReset"
                       >Yes</paper-button>
                     </div>
@@ -232,7 +219,7 @@
 </dom-module>
 <script>
 Polymer({
-  is: 'ha-connected_devices-card',
+  is: 'ch-connected_devices-card',
   properties: {
     hass: {
       type: Object,
@@ -242,6 +229,23 @@ Polymer({
     },
     groupEntity: {
       type: Object,
+    },
+    flexibilityOptions: {
+      type: Array,
+      value: [
+        {
+          label: 'high (8°F)',
+          value: 'high'
+        },
+        {
+          label: 'medium (4°F)',
+          value: 'medium'
+        },
+        {
+          label: 'low (2°F)',
+          value: 'low'
+        }
+      ]
     }
   },
   getParticipation: function (participate) {
@@ -253,37 +257,16 @@ Polymer({
   getDropdown: function (participate) {
       return (participate ? '' : 'display-none');
   },
-  getDataDevices: function(obj){
+  getDataDevices: function(obj) {
     return Object.keys(obj.attributes.devices).map((key) => {
       const device = obj.attributes.devices[key];
-      device.name = key;
+      device.key = key;
 
       return device;
     });
   },
   convertFlexibility: function (item) {
-    let selection = 0; // high
-
-    if (item.hasOwnProperty('flexibility'))
-    {
-      switch (item.flexibility)
-      {
-        case 'low':
-        {
-          selection = 2;
-          break;
-        }
-        case 'medium':
-        {
-          selection = 1;
-          break;
-        }
-        default:
-        {
-          // selection already is 0
-        }
-      }
-    }
+    const selection = item.flexibility;
 
     return selection;
   },

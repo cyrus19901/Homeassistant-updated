@@ -53,7 +53,7 @@ def setup(hass, config):
         
         connected_devices["attributes"] = attributes
 
-        hass.states.set('connected_devices.connected_devices', 'On', attributes, True)
+        hass.states.set('connected_devices.connected_devices', 'connected_homes', attributes, True)
 
     hass.services.register(
         DOMAIN,
@@ -98,21 +98,24 @@ class ConnectedDevicesComponent(Entity):
                     "reset": False,
                     "zone_min": 0,
                     "zone_max": 1,
-                    "flexibility": "high"
+                    "flexibility": "high",
+                    "name": "Air Conditioner living space"
                 },
                 "AC2": {
                     "participate": True,
                     "reset": False,
                     "zone_min": 0,
                     "zone_max": 1,
-                    "flexibility": "low"
+                    "flexibility": "low",
+                    "name": "Air Conditioner bedroom"
                 },
                 "WH1": {
                     "participate": True,
                     "reset": False,
                     "zone_min": 0,
                     "zone_max": 1,
-                    "flexibility": "low"
+                    "flexibility": "low",
+                    "name": "Water Heater"
                 }
             }
         }

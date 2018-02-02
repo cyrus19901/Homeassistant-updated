@@ -1,0 +1,278 @@
+<link rel='import' href='../../bower_components/polymer/polymer.html'>
+<link rel="import" href="../../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../../bower_components/polymer/lib/elements/custom-style.html">
+
+<dom-module id='ch-hems-comparer'>
+  <template>
+    <style include="paper-material">
+      :host {
+        display: block;
+        border-radius: 2px;
+        transition: all 0.30s ease-out;
+        padding:0 6px 0 6px;
+      }
+      .comparer-outer {
+        height: 130px;
+        width: 150px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .hems-comparer {
+        position: relative;
+        font-size: 12px;
+        line-height: 12px;
+      }
+      .bars-container {
+        display: block;
+        text-align: center;
+        border-bottom: 2px solid gray;
+      }
+      .bar {
+        display: inline-block;
+        vertical-align: bottom;
+        margin: 0 2px;
+      }
+      .bar > div:first-child {
+        text-align: left;
+        padding-bottom: 5px;
+      }
+      .rect {
+        width: 20px;
+        box-shadow: 4px -2px 4px 2px rgba(0, 0, 0, .2);
+        margin-right: 10px;
+      }
+      .estimate.benefit.pp {
+        background: repeating-linear-gradient(
+          45deg,
+          var(--paper-green-800),
+          var(--paper-green-800) 5px,
+          var(--paper-grey-400) 5px,
+          var(--paper-grey-400) 7px
+        );
+      }
+      .estimate.benefit.tou {
+        background: repeating-linear-gradient(
+          45deg,
+          var(--paper-green-800),
+          var(--paper-green-800) 5px,
+          black 5px,
+          black 7px
+        );
+      }
+      .goal.benefit.pp {
+        background: repeating-linear-gradient(
+          45deg,
+          var(--paper-blue-800),
+          var(--paper-blue-800) 5px,
+          var(--paper-grey-400) 5px,
+          var(--paper-grey-400) 7px
+        );
+      }
+      .goal.benefit.tou {
+        background: repeating-linear-gradient(
+          45deg,
+          var(--paper-blue-800),
+          var(--paper-blue-800) 5px,
+          black 5px,
+          black 7px
+        );
+      }
+      .estimate.reduction {
+        background: var(--paper-green-800);
+      }
+      .goal.reduction {
+        background: var(--paper-blue-800)
+      }
+      .actual {
+        background-color: #2db72d;
+      }
+      .using-peak-period .goal:last-child,
+      .using-peak-period .estimate:last-child {
+        box-sizing: border-box;
+        border-top: 1px solid white;
+      }
+      .not-peak-period .goal.pp,
+      .not-peak-period .estimate.pp {
+          display: none;
+      }
+    </style>
+    <div class="comparer-outer">
+      <div></div>
+      <div class="hems-comparer">
+        <div class$="[[container_class]]">
+          <div class="bar">
+            <div>[[pre_units]][[estimate_label]]&nbsp;[[post_units]]</div>
+            <div class="rect">
+              <div
+                class$="estimate [[item_class]] pp"
+                style="height: [[pp_estimate_height]]px"
+              ></div>
+              <div
+                class$="estimate [[item_class]] tou"
+                style="height: [[tou_estimate_height]]px"
+              ></div>
+            </div>
+          </div>
+          <div class="bar">
+            <div>[[pre_units]][[goal_label]]&nbsp;[[post_units]]</div>
+            <div class="rect">
+              <div
+                class$="goal [[item_class]] pp"
+                style="height: [[pp_goal_height]]px"
+              ></div>
+              <div
+                class$="goal [[item_class]] tou"
+                style="height: [[tou_goal_height]]px"
+              ></div>
+            </div>
+          </div>
+        </div>
+        <div class="item-label">[[item_label]]</div>
+      </div>
+    </div>
+  </template>
+</dom-module>
+
+<script>
+Polymer({
+  is: 'ch-hems-comparer',
+
+  properties: {
+    hass: {
+      type: Object,
+    },
+    estimate_label: {
+      type: String
+    },
+    goal_label: {
+      type: String
+    },
+    pp_estimate_label: {
+      type: String
+    },
+    pp_estimate_number: {
+      type: Number
+    },
+    tou_estimate_label: {
+      type: String
+    },
+    tou_estimate_number: {
+      type: Number
+    },
+    pp_goal_label: {
+      type: String
+    },
+    pp_goal_number: {
+      type: Number
+    },
+    tou_goal_label: {
+      type: String
+    },
+    tou_goal_number: {
+      type: Number
+    },
+    post_units: {
+      type: String
+    },
+    pre_units: {
+      type: String
+    },
+    pp_estimate_height: {
+      type: String
+    },
+    pp_goal_height: {
+      type: String
+    },
+    tou_estimate_height: {
+      type: String
+    },
+    tou_goal_height: {
+      type: String
+    },
+    item_label: {
+      type: String
+    },
+    chartHeight: {
+      type: Number,
+      value: 100
+    },
+    using_peak_period: {
+      type: Boolean,
+      observer: 'updateUsingPeakPeriod'
+    },
+    max_value: {
+      type: Number,
+      observer: 'updateHeights'
+    },
+    item_class: {
+      type: String,
+      computed: 'getCardClass(item_label)'
+    },
+    container_class: {
+      type: String,
+      computed: 'getContainerClass(using_peak_period)'
+    }
+  },
+  getCardClass: function (itemLabel) {
+      return (itemLabel == 'energy reduction' ? 'reduction' : 'benefit');
+  },
+  getContainerClass: function (usingPeakPeriod) {
+      let containerClass = 'bars-container ';
+      
+      containerClass = containerClass + (
+        usingPeakPeriod ? 'using-peak-period' : 'not-peak-period'
+      );
+      
+      return containerClass;
+  },
+  updateHeights: function (maxValue) {
+
+    this.pp_estimate_number = this.convertNumber(this.pp_estimate_label);
+    this.pp_goal_number = this.convertNumber(this.pp_goal_label);
+    
+    this.tou_estimate_number = this.convertNumber(this.tou_estimate_label);
+    this.tou_goal_number = this.convertNumber(this.tou_goal_label);
+    
+
+    this.pp_estimate_height = this.computeHeight(this.pp_estimate_number);
+    this.pp_goal_height = this.computeHeight(this.pp_goal_number);
+
+    this.tou_estimate_height = this.computeHeight(this.tou_estimate_number);
+    this.tou_goal_height = this.computeHeight(this.tou_goal_number);
+
+
+    this.updateUsingPeakPeriod(this.using_peak_period);
+  },
+  updateUsingPeakPeriod: function (usingPeakPeriod)
+  { 
+      if (usingPeakPeriod)
+      {
+          this.estimate_label = this.convertNumber(this.pp_estimate_label) + this.convertNumber(this.tou_estimate_label);
+
+          this.goal_label = this.convertNumber(this.pp_goal_label) + this.convertNumber(this.tou_goal_label);
+      }
+      else
+      {
+          this.estimate_label = this.convertNumber(this.tou_estimate_label);
+
+          this.goal_label = this.convertNumber(this.tou_goal_label);
+      }
+  },
+  computeHeight: function (num) {
+      const itemHeight = num / this.max_value * this.chartHeight;
+      return Math.ceil(itemHeight);
+  },
+  convertNumber: function (str) {
+      const num = (str[0] === "$" ? Number(str.substring(1)) : Number(str));
+      return num;
+  },
+  getMax: function (items) {
+      const max = (this.max_value ? this.max_value : 0);
+
+      return max;
+  }
+});
+
+
+</script>

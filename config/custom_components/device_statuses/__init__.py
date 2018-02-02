@@ -48,7 +48,7 @@ def setup(hass, config):
 
         device_statuses["attributes"] = attributes
 
-        hass.states.set('device_statuses.device_statuses', 'On', attributes, True)
+        hass.states.set('device_statuses.device_statuses', 'connected_homes', attributes, True)
 
     hass.services.register(
         DOMAIN,
@@ -129,21 +129,27 @@ class DeviceStatusesComponent(Entity):
                             '2017-07-17 23:40:58.368599Z',
                             '2017-07-17 23:41:28.368599Z'
                         ],
+                        "step": 30,
                         "time-format": "h:mm a",
                         "series": {
                             "AC1": { 
+                                "name": "Air Conditioner living space",
                                 "points": [ 3, 4, 6, 5, 3, 4, 4, 5, 4, 5 ]
                             },
                             "AC2": { 
+                                "name": "Air Conditioner bedroom",
                                 "points": [ 4, 5, 5, 4, 3, 5, 6, 2, 6, 6 ]
                             },
                             "WH1": { 
+                                "name": "Water Heater",
                                 "points": [ 3, 2, 3, 6, 5, 5, 3, 3, 3, 2 ]
                             }
                         }
                     },
                     "type": "bar",
-                    "label": "Energy (kWh)",
+                    "label": "Energy",
+                    "yAxisLabel": "kWh",
+                    "xAxisLabel": "Time",
                     "id": "device-energy",
                     "updateMethod": "update_chart_type"
                 },
@@ -164,21 +170,26 @@ class DeviceStatusesComponent(Entity):
                         "time-format": "h:mm a",
                         "series": {
                             "AC1": { 
+                                "name": "Air Conditioner living space",
                                 "points": [ 3, 4, 2, 2, 6, 5, 5, 4, 3, 5 ],
                                 "time-format": "h:mm a"
                             },
                             "AC2": { 
+                                "name": "Air Conditioner bedroom",
                                 "points": [ 7, 6, 7, 5, 4, 4, 2, 2, 3, 6 ],
                                 "time-format": "h:mm a"
                             },
                             "WH1": { 
+                                "name": "Water Heater",
                                 "points": [ 5, 3, 3, 2, 3, 5, 4, 6, 6, 3 ],
                                 "time-format": "h:mm a"
                             }
                         }
                     },
                     "type": "bar",
-                    "label": "Power (kW)",
+                    "label": "Power",
+                    "yAxisLabel": "kW",
+                    "xAxisLabel": "Time",
                     "id": "device-power",
                     "updateMethod": "update_chart_type"
                 }

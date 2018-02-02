@@ -6,15 +6,17 @@
 <link rel='import' href='./ha-media_player-card.html'>
 <link rel='import' href='./ha-weather-card.html'>
 <link rel='import' href='./ha-persistent_notification-card.html'>
-<link rel='import' href='./ha-transactive_home-card.html'>
-<link rel='import' href='./ha-whole_house_energy-card.html'>
-<link rel='import' href='./ha-energy_efficiency-card.html'>
-<link rel='import' href='./ha-time_of_use-card.html'>
-<link rel='import' href='./ha-connected_devices-card.html'>
-<link rel='import' href='./ha-advanced_settings-card.html'>
-<link rel='import' href='./ha-device_statuses-card.html'>
-<link rel='import' href='./ha-data_privacy-card.html'>
-<link rel='import' href='./ha-user_settings-card.html'>
+<link rel='import' href='./ch-transactive_home-card.html'>
+<link rel='import' href='./ch-whole_house_energy-card.html'>
+<link rel='import' href='./ch-energy_efficiency-card.html'>
+<link rel='import' href='./ch-time_of_use-card.html'>
+<link rel='import' href='./ch-connected_devices-card.html'>
+<link rel='import' href='./ch-advanced_settings-card.html'>
+<link rel='import' href='./ch-device_statuses-card.html'>
+<link rel='import' href='./ch-data_privacy-card.html'>
+<link rel='import' href='./ch-shortcut_adder-card.html'>
+<link rel='import' href='./ch-user_settings-card.html'>
+<link rel='import' href='./ch-extras-card.html'>
 <script>
 Polymer({
   is: 'ha-card-chooser',
@@ -29,7 +31,17 @@ Polymer({
   cardDataChanged: function (newData) {
     if (!newData) return;
 
-    window.hassUtil.dynamicContentUpdater(this, 'HA-' + newData.cardType.toUpperCase() + '-CARD',
+    const cardPrefix = (
+        (
+            newData.stateObj && 
+            newData.stateObj.hasOwnProperty('state') && 
+            newData.stateObj.state === 'connected_homes'
+        ) ?
+        'CH-' :
+        'HA-'
+    );
+
+    window.hassUtil.dynamicContentUpdater(this, cardPrefix + newData.cardType.toUpperCase() + '-CARD',
                           newData);
   },
 });

@@ -5,11 +5,11 @@
 <link rel="import" href="../../bower_components/datetime-picker/time-picker.html">
 
 <link rel='import' href='../components/ha-card.html'>
-<link rel='import' href='../controls/ha-time-select.html'>
+<link rel='import' href='../controls/ch-time-select.html'>
 
 <script src="../../bower_components/moment/min/moment.min.js"></script>
 
-<dom-module id='ha-advanced_settings-card'>
+<dom-module id='ch-advanced_settings-card'>
   <template>
     <style is="custom-style" include="iron-flex"></style>
     <style>
@@ -182,24 +182,24 @@
           <table>
             <tr>
               <td>
-                <ha-time-select 
+                <ch-time-select 
                   hass="[[hass]]"
                   state_obj="[[stateObj]]"
                   update_method="update_advanced_settings"
                   time_value="[[stateObj.attributes.savingsStartTime.value]]"
                   item_prop="savingsStartTime"
                   item_label="Start Time"
-                ></ha-time-select>
+                ></ch-time-select>
               </td>
               <td>
-                <ha-time-select 
+                <ch-time-select 
                   hass="[[hass]]"
                   state_obj="[[stateObj]]"
                   update_method="update_advanced_settings"
                   time_value="[[stateObj.attributes.savingsEndTime.value]]"
                   item_prop="savingsEndTime"
                   item_label="End Time"
-                ></ha-time-select>
+                ></ch-time-select>
               </td>
             </tr>
           </table>
@@ -256,7 +256,7 @@
           >
             <tr class="time-of-use">
               <td>
-                <ha-time-select 
+                <ch-time-select 
                   hass="[[hass]]"
                   state_obj="[[stateObj]]"
                   update_method="update_advanced_settings"
@@ -266,11 +266,11 @@
                   item_listprop="startTime"
                   item_index=[[index]]
                   item_label=""
-                ></ha-time-select>
+                ></ch-time-select>
               </td>
               <td>to</td>
               <td>
-                <ha-time-select 
+                <ch-time-select 
                   hass="[[hass]]"
                   state_obj="[[stateObj]]"
                   update_method="update_advanced_settings"
@@ -280,7 +280,7 @@
                   item_listprop="endTime"
                   item_index=[[index]]
                   item_label=""
-                ></ha-time-select>
+                ></ch-time-select>
               </td>
               <td>
                 :
@@ -311,7 +311,7 @@
 
 <script>
 Polymer({
-  is: 'ha-advanced_settings-card',
+  is: 'ch-advanced_settings-card',
   ready: function () {
     this.$$('#time-period-start').addEventListener('value-changed', this.updateSetting.bind(this));
     this.$$('#time-period-end').addEventListener('value-changed', this.updateSetting.bind(this));

@@ -63,7 +63,7 @@ def setup(hass, config):
 
         # energy_efficiency["attributes"] = attributes
 
-        hass.states.set('energy_efficiency.peak_period_energy_and_compensation', 'On', attributes, True)
+        hass.states.set('energy_efficiency.peak_period_energy_and_compensation', 'connected_homes', attributes, True)
 
     hass.services.register(
         DOMAIN,

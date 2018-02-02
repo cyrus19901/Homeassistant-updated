@@ -1,0 +1,12 @@
+
+update_extras:
+  description: Add extra content to the UI 
+
+  fields:
+    device:
+      description: Name of setting to change
+      example: 'device1'
+
+    obj:
+      description: An object containing the value
+      example: 'obj.value'

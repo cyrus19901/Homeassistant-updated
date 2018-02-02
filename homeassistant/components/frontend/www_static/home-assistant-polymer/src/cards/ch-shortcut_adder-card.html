@@ -1,0 +1,398 @@
+<link rel='import' href='../../bower_components/polymer/polymer.html'>
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-radio-button/paper-radio-button.html">
+<link rel="import" href="../../bower_components/paper-radio-group/paper-radio-group.html">
+
+<link rel='import' href='../components/ha-card.html'>
+
+<dom-module id='ch-shortcut_adder-card'>
+  <template>
+    <style is="custom-style" include="iron-flex"></style>
+    <style>
+      
+      .header {
+        @apply(--paper-font-headline);
+        /* overwriting line-height +8 because entity-toggle can be 40px height,
+           compensating this with reduced padding */
+        line-height: 40px;
+        color: var(--primary-text-color);
+        padding: 20px 16px 12px;
+      }
+      .header .name {
+        @apply(--paper-font-common-nowrap);
+      }
+      .header.domain .name {
+        /* Capitalize cards titles for default domain groups. */
+        text-transform: capitalize;
+      }
+      .display-inline {
+        display: block;
+      }
+      .display-inline > * {
+        display: inline-block;
+      }
+      tr {
+        cursor: pointer;
+      }
+      .content {
+        padding: 4px 30px 30px;
+      }
+      table {
+        border-collapse: collapse;
+      }
+      td {
+        padding: 10px;
+      }
+      td.buttons {
+        vertical-align: top;
+        text-align: right;
+      }
+      td.buttons > div {
+        display: block;
+        min-width: 100px;
+      }
+      td.buttons > div > * {
+        display: inline-block;
+      }
+      .url {
+        max-width: 200px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+      paper-icon-button {
+        color: gray;
+      }
+      iron-icon {
+        color: green;
+      }
+      #edit-shortcut div {
+        min-width: 400px;
+      }
+      paper-radio-button.pink {
+        --paper-radio-button-checked-color: var(--paper-pink-500);
+        --paper-radio-button-checked-ink-color: var(--paper-pink-500);
+        --paper-radio-button-unchecked-color: var(--paper-pink-900);
+        --paper-radio-button-unchecked-ink-color: var(--paper-pink-900);
+        --paper-radio-button-label-color: var(--paper-pink-500);
+      }
+      paper-radio-button.teal {
+        --paper-radio-button-checked-color: var(--paper-teal-500);
+        --paper-radio-button-checked-ink-color: var(--paper-teal-500);
+        --paper-radio-button-unchecked-color: var(--paper-teal-900);
+        --paper-radio-button-unchecked-ink-color: var(--paper-teal-900);
+        --paper-radio-button-label-color: var(--paper-teal-500);
+      }
+      paper-radio-button.orange {
+        --paper-radio-button-checked-color: var(--paper-orange-500);
+        --paper-radio-button-checked-ink-color: var(--paper-orange-500);
+        --paper-radio-button-unchecked-color: var(--paper-orange-900);
+        --paper-radio-button-unchecked-ink-color: var(--paper-orange-900);
+        --paper-radio-button-label-color: var(--paper-orange-500);
+      }
+    </style>
+
+    <ha-card class='shortcut-adder'>
+      <div class='header domain'>
+        <div class='name'>Custom Links
+          <paper-icon-button
+            mini 
+            icon="mdi:plus-circle-outline"
+            on-click="addShortcut"
+          ></paper-icon-button>
+          </div>
+      </div>
+      <div class="content">
+        <table>
+          <template is='dom-repeat' items="[[getShortcuts()]]">
+            <tr 
+              data-id="[[item.id]]"
+            >
+              <td>
+                <div>[[item.name]]</div>
+                <div class="description">[[item.description]]</div>
+                <div class="url">[[item.url]]</div>
+                <div class="url">[[item.image]]</div>
+                <div class="url">[[item.image_url]]</div>
+              </td>
+              <td class='buttons'>
+                <div>
+                  <paper-icon-button
+                    mini 
+                    icon="mdi:pencil"
+                    data-id="[[item.id]]"
+                    on-click="editShortcut"
+                  ></paper-icon-button>
+                  <paper-icon-button
+                    mini 
+                    icon="mdi:delete"
+                    data-id="[[item.id]]"
+                    on-click="removeShortcut"
+                  ></paper-icon-button>
+                </div>
+              </td>
+            </tr>
+          </template>
+        </table>
+        <paper-dialog id="edit-shortcut" class="popup">
+            <h3>[[update_obj.label]] Link</h3>
+            <div>
+              <paper-checkbox 
+                data-prop="enabled"
+                checked="[[update_obj.enabled]]"
+                on-change="setPropValue"
+              >
+                Enable this link
+              </paper-checkbox>
+              <paper-input 
+                label="Name"
+                data-prop="name"
+                on-change="setPropValue" 
+                value="[[update_obj.name]]" 
+              >
+              </paper-input>
+              <paper-input 
+                label="Description"
+                data-prop="description"
+                on-change="setPropValue" 
+                value="[[update_obj.description]]" 
+              >
+              </paper-input>
+              <paper-input 
+                label="Web Address"
+                data-prop="url"
+                on-change="setPropValue" 
+                value="[[update_obj.url]]" 
+              >
+              </paper-input>
+              <paper-input 
+                label="Image Name"
+                data-prop="image"
+                on-change="setPropValue" 
+                value="[[update_obj.image]]" 
+              >
+              </paper-input>
+              <paper-input 
+                label="Image Address"
+                data-prop="image"
+                on-change="setPropValue" 
+                value="[[update_obj.image_url]]" 
+              >
+              </paper-input>
+              <label>Card Color:</label>
+              <paper-radio-group
+                on-change="colorSelect"
+                selected="[[update_obj.color]]"
+              >
+                <paper-radio-button
+                  name="none"
+                  data-color="none"
+                  class=""
+                >none</paper-radio-button>
+                <paper-radio-button
+                  name="pink"
+                  class="pink"
+                  data-color="pink"
+                >pink</paper-radio-button>
+                <paper-radio-button
+                  name="teal"
+                  class="teal"
+                  data-color="teal"
+                >teal</paper-radio-button>
+                <paper-radio-button
+                  name="orange"
+                  class="orange"
+                  data-color="orange"
+                >orange</paper-radio-button>
+              </paper-radio-group>
+            </div>
+            <paper-button 
+              on-click="handleModalClick"
+            >[[update_obj.label]]</paper-button>
+          </paper-dialog>
+      </div>
+    </ha-card>
+  </template>
+</dom-module>
+<script>
+Polymer({
+  is: 'ch-shortcut_adder-card',
+  properties: {
+    hass: {
+      type: Object,
+    },
+    stateObj: {
+      type: Object,
+    },
+    update_obj: {
+      type: Object,
+    },
+    shortcut_name: {
+      type: String,
+    },
+    shortcut_description: {
+      type: String,
+    },
+    shortcut_url: {
+      type: String,
+    },
+    shortcut_button: {
+      type: String,
+    },
+    shortcut_image: {
+      type: String,
+    }
+  },
+  ready: function () {
+      this.doEditShortcut = this.doEditShortcut.bind(this);
+      this.doAddShortcut = this.doAddShortcut.bind(this);
+  },
+  getShortcuts: function() {
+      let shortCuts = [];
+
+      if (this.hass && this.hass.states['extras.extras'])
+      {
+          shortCuts = this.hass.states['extras.extras'].attributes.extra_items;
+      }
+
+      return shortCuts;
+  },
+  addShortcut: function (ev) {
+      const dialogName = `#edit-shortcut`;
+      this.$$(dialogName).open();
+
+      this.update_obj = { 
+        label: 'Add',
+        onSubmit: this.doAddShortcut,
+        name: '',
+        description: '',
+        url: '',
+        button: '', 
+        image: '',
+        enabled: true,
+        color: 'none'
+      };
+  },
+  editShortcut: function (ev) {
+    if (ev.target)
+    {
+      const id = ev.target.dataId;
+
+      if (this.hass && this.hass.states['extras.extras'])
+      {
+          const shortCuts = this.hass.states['extras.extras'].attributes.extra_items;
+
+          if (shortCuts.length)
+          {
+            const target = shortCuts.find((shortCut) => shortCut.id === id);
+
+            if (typeof target !== 'undefined')
+            {
+              this.update_obj = { 
+                label: 'Edit',
+                onSubmit: this.doEditShortcut,
+                name: target.name,
+                description: target.description,
+                url: target.url,
+                button: target.button, 
+                image: target.image,
+                enabled: target.enabled,
+                id: target.id,
+                color: (target.color ? target.color : 'none')
+              };
+            }
+          }
+      }
+
+      const dialogName = `#edit-shortcut`;
+      this.$$(dialogName).open();
+    }
+  },
+  setPropValue: function (ev) {
+    if (ev.target)
+    {
+      switch (ev.target.nodeName)
+      {
+          case 'PAPER-INPUT':
+          {
+            const prop = ev.target.dataset.prop;
+            this.update_obj[prop] = ev.currentTarget.value;
+            break;
+          }
+          case 'PAPER-CHECKBOX':
+          {
+            const prop = ev.target.dataset.prop;
+            this.update_obj[prop] = ev.target.checked;
+            break;
+          }
+      }
+      
+    }
+  },
+  colorSelected: function (obj, color) {
+    return (obj.color === color || (!obj.color && color === 'none'));
+  },
+  colorSelect: function (ev) {
+    console.log('color');
+    console.log(ev);
+    this.update_obj.color = ev.target.dataset.color;
+  },
+  handleModalClick: function (ev) {
+    this.update_obj.onSubmit();
+    const dialogName = `#edit-shortcut`;
+    this.$$(dialogName).close();
+  },
+  doEditShortcut: function () {
+    if (this.update_obj.hasOwnProperty('name'))
+    {
+      delete this.update_obj.label;
+      delete this.update_obj.onSubmit;
+
+      this.callServiceHelper('update_extras', { edit: this.update_obj });
+    }
+  },
+  doAddShortcut: function () {
+    if (this.update_obj.hasOwnProperty('name'))
+    {
+      this.update_obj.id = this.update_obj.name.toLowerCase().replace(/ /g, '_');
+
+      delete this.update_obj.label;
+      delete this.update_obj.onSubmit;
+
+      this.callServiceHelper('update_extras', { new: this.update_obj });
+    }
+  },
+  removeShortcut: function (ev) {
+
+    let updateObj = {};
+
+    if (ev.target)
+    {
+      const id = ev.target.dataId;
+      updateObj.remove = { id };
+    }
+
+    this.callServiceHelper('update_extras', updateObj);
+  },
+  updateSetting: function (evt) {
+      const newValue = evt.currentTarget.dataSetting;
+
+      const updateObj = { 
+        'value': newValue 
+      };
+        
+      this.callServiceHelper('update_shortcut_adder', updateObj);
+  },
+  callServiceHelper: function (service, data) {
+    if (this.hass)
+    {      
+      this.hass.callService('extras', service, { value: data})
+        .then(function () {
+        }.bind(this));
+    }
+  }
+});
+</script>

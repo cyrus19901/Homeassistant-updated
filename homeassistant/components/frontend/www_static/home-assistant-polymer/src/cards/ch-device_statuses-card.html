@@ -1,9 +1,9 @@
 <link rel='import' href='../../bower_components/polymer/polymer.html'>
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
-<link rel="import" href='../components/state-charts-container.html'>
+<link rel="import" href='../components/ch-charts-container.html'>
 <link rel='import' href='../components/ha-card.html'>
 
-<dom-module id='ha-device_statuses-card'>
+<dom-module id='ch-device_statuses-card'>
   <template>
     <style is="custom-style" include="iron-flex"></style>
     <style>
@@ -46,22 +46,23 @@
 
     </style>
 
-    <ha-card class='device-statuses'>
+    <ha-card id='deviceStatusesCard' class='device-statuses'>
       <div class='header domain'>
         <div class='name'>[[stateObj.attributes.friendly_name]]</div>
       </div>
       <div class='data-chart'>
-        <state-charts-container
+        <ch-charts-container
           state-obj="[[stateObj]]"
-          hass="[[hass]]">
-        </state-charts-container>
+          hass="[[hass]]"
+          card_width="[[cardWidth]]">
+        </ch-charts-container>
       </div>
     </ha-card>
   </template>
 </dom-module>
 <script>
 Polymer({
-  is: 'ha-device_statuses-card',
+  is: 'ch-device_statuses-card',
   properties: {
     hass: {
       type: Object,
@@ -71,7 +72,18 @@ Polymer({
     },
     groupEntity: {
       type: Object,
+    },
+    cardWidth: {
+      type: Number
     }
   },
+  ready: function() {
+      try {
+        this.cardWidth = this.getClientRects()[1].width;
+      }
+      catch(e) {
+
+      }
+  }
 });
 </script>

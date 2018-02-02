@@ -18,20 +18,20 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 
 
 class EnergyEfficiencyPlatform(EnergyEfficiencyComponent):
-    """Representation of a demo climate device."""
+    """Representation of the energy efficiency platform."""
 
     def __init__(self):
-        """Initialize the climate device."""
-        self._state = 'On'
+        """Initialize the platform."""
+        self._state = 'connected_homes'
 
     @property
     def state(self):
-        """Return the state of the sensor."""
+        """Return the state of the platform."""
         return self._state
 
     @property
     def name(self):
-        """Return the name of the sensor."""
+        """Return the name of the platform."""
         return 'Peak Period Energy and Compensation'
 
     def set_energy_efficiency(self: EnergyEfficiencyComponent, new_value):

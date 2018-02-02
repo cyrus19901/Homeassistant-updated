@@ -1,0 +1,361 @@
+<link rel='import' href='../../bower_components/polymer/polymer.html'>
+<link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel='import' href='../components/ha-card.html'>
+
+<link rel='import' href='../controls/ch-hems-comparer.html'>
+
+
+<dom-module id='ch-whole_house_energy-card'>
+  <template>
+    <style is="custom-style" include="iron-flex"></style>
+    <style>
+      .states {
+        padding-bottom: 16px;
+      }
+      .state {
+        padding: 4px 16px;
+      }
+      td, th {
+        padding-right: 8px;
+      }
+      .state .label {
+        color: rgba(0, 0, 0, 0.54);
+        font-weight: bold;
+        text-transform: capitalize;
+      }
+      .state .value {
+        color: rgba(0, 0, 0, 0.87);
+      }
+      .header {
+        @apply(--paper-font-headline);
+        /* overwriting line-height +8 because entity-toggle can be 40px height,
+           compensating this with reduced padding */
+        line-height: 40px;
+        color: var(--primary-text-color);
+        padding: 20px 16px 20px;
+      }
+      .header .name {
+        @apply(--paper-font-common-nowrap);
+
+      }
+      .header.domain .name {
+        /* Capitalize cards titles for default domain groups. */
+        text-transform: capitalize;
+      }
+      .comparer-container {
+        width: 400px;
+        height: 160px;
+        flex-direction: column;
+        justify-content: space-between;
+        display: flex;
+      }
+      .comparer-container > div {
+        display: block;
+        text-align: center;
+        margin-bottom: 10px;
+        white-space: nowrap;
+      }
+      .comparer-container > div > * {
+        display: inline-block;
+        vertical-align: bottom;
+      }
+      .outlook-label {
+        color: dimgray;
+        font-size: 16px;
+        font-weight: bold;
+        padding-left: 10px;
+      }
+      .toggle-container {
+        font-size: 14px;
+        padding-left: 10px;
+        height: 40px;
+      }
+      .color-box {
+        height: 10px;
+        width: 10px;
+      }
+      .color-box.savings {
+        background: repeating-linear-gradient(
+          45deg,
+          var(--paper-grey-400),
+          var(--paper-grey-400) 2px,
+          transparent 2px,
+          transparent 4px
+        );
+      }
+      .color-box.compensation {
+        background: repeating-linear-gradient(
+          45deg,
+          black,
+          black 2px,
+          transparent 2px,
+          transparent 4px
+        );
+      }
+      .color-box.estimate {
+        background-color: var(--paper-green-800);
+      }
+      .color-box.goal {
+        background-color: var(--paper-blue-800);
+      }
+      .legend {
+        font-size: 14px;
+        line-height: 14px;
+        float: right;
+      }
+      .your-money {
+        float: right;
+        border: 2px solid gray;
+        font-size: 14px;
+        padding: 0 20px;
+        margin-right: 10px;
+      }
+      .your-money > .amount {
+        font-weight: bold;
+        color: green;
+      }
+
+    </style>
+    <ha-card class="whole-house-energy" style$="[[getUseOutlookStyle(stateObj)]]">
+      <div class="header domain">
+        <div class="name">Energy Reduction and Benefit ($)</div>
+        <div class="outlook-label">Today's Outlook</div>
+        <div class="legend">
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="color-box estimate"></div>
+                </td>
+                <td>
+                  estimate (from HEMS)
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="color-box goal"></div>
+                </td>
+                <td>
+                  goal (from utility)
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="color-box savings"></div>
+                </td>
+                <td>
+                  compensation
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="color-box compensation"></div>
+                </td>
+                <td>
+                  savings
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="comparer-container">
+          <div></div>
+          <div>
+            <ch-hems-comparer 
+              tou_estimate_label="[[getAttributes(stateObj, 'touReductionEstimate', 'value')]]"
+              tou_goal_label="[[getAttributes(stateObj, 'touReductionGoal', 'value')]]"
+              pp_estimate_label="[[getAttributes(stateObj, 'ppReductionEstimate', 'value')]]"
+              pp_goal_label="[[getAttributes(stateObj, 'ppReductionGoal', 'value')]]"
+              post_units="kWh"
+              item_label="energy reduction"
+              max_value="[[max_reduction]]"
+              using_peak_period="[[getAttributes(stateObj, 'useAlgorithm', 'value')]]"
+            ></ch-hems-comparer>
+            <ch-hems-comparer 
+              tou_estimate_label="[[getAttributes(stateObj, 'touBenefitEstimate', 'value')]]"
+              tou_goal_label="[[getAttributes(stateObj, 'touBenefitGoal', 'value')]]"
+              pp_estimate_label="[[getAttributes(stateObj, 'ppBenefitEstimate', 'value')]]"
+              pp_goal_label="[[getAttributes(stateObj, 'ppBenefitGoal', 'value')]]"
+              pre_units="$"
+              item_label="benefit"
+              max_value="[[max_money]]"
+              using_peak_period="[[getAttributes(stateObj, 'useAlgorithm', 'value')]]"
+            ></ch-hems-comparer>
+          </div>
+        </div>
+        <div class="your-money">
+          <span class="dollar-signs">Total estimated benefit</span>: 
+          $[[total_benefit]]
+        </div>
+        <div class="toggle-container">
+          <template is="dom-if" if="[[stateObj.attributes.canToggle]]">
+            <paper-toggle-button raised
+              on-change="useOutlook"
+              checked="[[getAttributes(stateObj, 'useAlgorithm', 'value')]]"
+              data-prop="useAlgorithm"
+            >
+              [[getToggleLabel(stateObj)]]
+            </paper-toggle-button>
+          </template>
+        </div>
+      </div>
+    </ha-card>
+  </template>
+</dom-module>
+
+<script>
+Polymer({
+  is: 'ch-whole_house_energy-card',
+  properties: {
+    hass: {
+      type: Object
+    },
+    stateObj: {
+      type: Object,
+      observer: 'updateCardState'
+    },
+    groupEntity: {
+      type: Object,
+    },
+    useLabel: {
+      type: String,
+      value: "Opting in"
+    },
+    notUseLabel: {
+      type: String,
+      value: "Opting out"
+    },
+    max_reduction: {
+      type: Number
+    },
+    max_money: {
+      type: Number
+    },
+    total_benefit: {
+      type: Number
+    }
+  },
+  updateCardState: function () {
+      this.max_reduction = this.getMax('Reduction');
+      this.max_money = this.getMax('Benefit');
+
+      this.total_benefit = this.getTotalBenefit();
+  },
+  getMax: function (type) {
+      let max = 0;
+
+      if (this.hass)
+      {
+          const maxes = [];
+
+          const estimateTotal = this.getTotal(this.stateObj.attributes, type + 'Estimate');
+
+          maxes.push(estimateTotal);
+
+          const goalTotal = this.getTotal(this.stateObj.attributes, type + 'Goal');
+
+          maxes.push(goalTotal);
+
+          max = Math.max(...maxes);
+      }
+
+      return max;
+  },
+  getTotal: function (obj, category) {
+      let total = 0;
+
+      total = this.addToTotal(total, 'tou' + category, obj);
+      total = this.addToTotal(total, 'pp' + category, obj);
+
+      return total;
+  },
+  addToTotal: function (total, attr, obj) {
+      let newTotal = total;
+
+      if (obj[attr])
+      {
+        newTotal = newTotal + Number(this.convertNumber(obj[attr].value));
+      }
+
+      return newTotal;
+  },
+  convertNumber: function (str) {
+      const num = (str[0] === "$" ? Number(str.substring(1)) : Number(str));
+      return num;
+  },
+  getTotalBenefit: function () {
+    const compensation = this.convertNumber(this.stateObj.attributes.touBenefitEstimate.value);
+
+    let benefit = compensation;
+
+    if (this.stateObj.attributes.useAlgorithm.value)
+    {
+        const savings = this.convertNumber(this.stateObj.attributes.ppBenefitEstimate.value);
+
+        benefit = benefit + savings;
+    }
+
+    return benefit;
+  },
+  useOutlook: function (evt) {
+      const checked = evt.target.checked;
+      const prop = evt.currentTarget.dataset.prop;
+
+      this.updateSetting(checked, prop, 'update_whole_house_energy', 'whole_house_energy');
+  },
+  getToggleLabel: function (stateObj) {
+      let toggleLabel = "";
+
+      if (stateObj)
+      {
+          const useOutlook = stateObj.attributes.useAlgorithm.value;
+          toggleLabel = (useOutlook ? this.useLabel : this.notUseLabel);
+      }
+      
+      return toggleLabel;
+  },
+  getUseOutlookStyle: function (stateObj) {
+      let useOutlookStyle = "";
+
+      if (stateObj)
+      {
+          const useOutlook = stateObj.attributes.useAlgorithm.value;
+          useOutlookStyle = (!useOutlook ? "background-color: lightgray" : '');
+      }
+      
+      return useOutlookStyle;
+  },
+  getAttributes: function (obj, attr, subattr) {
+    let value = '';
+
+    if (obj.attributes.hasOwnProperty(attr) && obj.attributes[attr].hasOwnProperty(subattr))
+    {
+      value = obj.attributes[attr][subattr];
+    }
+
+    return value;
+  },
+  getGoalLabel: function (obj) {
+      return obj.attributes.goalLegendLabel;
+  },
+  updateSetting: function (newValue, prop, method, platform) {
+      const updateObj = { 
+        'target': prop,
+        'subtarget': 'value',
+        'value': newValue 
+      };
+        
+      this.callServiceHelper(method, updateObj, platform);
+  },
+  callServiceHelper: function (service, data, platform) {
+    if (this.hass)
+    {      
+      this.hass.callService(platform, service, { value: data})
+        .then(function () {
+          // console.log('successful service call');
+        }.bind(this));
+    }
+  }
+});
+</script>

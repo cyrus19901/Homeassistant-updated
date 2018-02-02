@@ -1,6 +1,6 @@
 
 update_whole_house_energy:
-  description: Update values in whole house energy 
+  description: Update values in whole-house energy
 
   fields:
     obj:

@@ -5,14 +5,14 @@
 <link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
 
 <link rel='import' href='../components/ha-card.html'>
-<link rel="import" href='../components/state-charts-container.html'>
-<link rel='import' href='../controls/ha-progress-scale.html'>
+<link rel="import" href='../components/ch-charts-container.html'>
+<link rel='import' href='../controls/ch-progress-scale.html'>
 
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 <link href="../../bower_components/toastr/toastr.css" rel="stylesheet"/>
 <script src="../../bower_components/toastr/toastr.js"></script>
 
-<dom-module id='ha-transactive_home-card'>
+<dom-module id='ch-transactive_home-card'>
   <template>
     <style is="custom-style" include="iron-flex"></style>
     <style>
@@ -23,7 +23,7 @@
         padding-right: 8px;
       }
       .state .label {
-        color: rgba(0, 0, 0, 0.54);
+        color: var(--paper-blue-900);
       }
       .state .value {
         color: rgba(0, 0, 0, 0.87);
@@ -106,42 +106,49 @@
         text-align: right;
         clear: right;
       }
+      .yearly-text .label {
+        color: var(--paper-blue-900);
+      }
       .state th:first-child {
-        height: 1px;
-        border: 1px solid lightgray;
+        border-top: 1px solid black;
         padding: 0;
         margin: 0;
         box-sizing: border-box;
+      }
+      .current-state {
+        display: inline-block;
       }
     </style>
     <ha-card class='transactive-home'>
       <div class='header domain'>
         <div class='name'>[[stateObj.attributes.friendly_name]]</div>
       </div>
-      <div class='state'>
-        Today (as of now)
-      </div>
-      <table class='state'>
-        <thead>
-          <tr>
-            <th colspan=2><th>
-          </tr>
-        </thead>
-        <tbody>
-          <template is='dom-repeat' items="[[getList(stateObj)]]">
+      <div class='current-state'>
+        <div class='state'>
+          Today (as of now)
+        </div>
+        <table class='state'>
+          <thead>
             <tr>
-              <td class='label'>[[item.label]]</td>
-              <td class='value'>[[item.value]] [[item.unit]]</td>
+              <th colspan=2><th>
             </tr>
-          </template>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <template is='dom-repeat' items="[[getList(stateObj)]]">
+              <tr>
+                <td class='label'>[[item.label]]</td>
+                <td class='value'>[[item.value]] [[item.unit]]</td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
       <div class='progress-container'>
           <div>
             Yearly Savings
           </div>
           <div class='progress-bar'>
-            <ha-progress-scale 
+            <ch-progress-scale 
               id="overall-progress"
               hass="[[hass]]"
               state_obj="[[stateObj]]"
@@ -152,29 +159,31 @@
               description="[[progressMessage]]"
               item_prop="progress_bar"
               right_prop="end_point"
-            ></ha-progress-scale>
+            ></ch-progress-scale>
           </div>
       </div>
       <div class="yearly-text">
         <div>
-          <span>[[stateObj.attributes.progress_bar.lastYearLabel]]:&nbsp;<span>
+          <span class="label">[[stateObj.attributes.progress_bar.lastYearLabel]]:&nbsp;</span>
           <span>[[formatMoney(stateObj.attributes.progress_bar.last_year)]]</span>
         </div>
         <div>
           <span>[[getPercentSavings(stateObj)]]%&nbsp;</span>
-          <span>[[stateObj.attributes.progress_bar.comparisonLabel]]</span>
+          <span class="label">[[stateObj.attributes.progress_bar.comparisonLabel]]</span>
         </div>
       </div>
       <div class="show-hide-chart">
         <paper-fab
           mini
           on-click="showHideChart"
-          icon="more-vert"
+          icon="mdi:chart-line"
         ></paper-fab>
         <div class='data-chart' hidden$="{{hidden}}">
-          <state-charts-container
-            state-obj="[[stateObj]]">
-          </state-charts-container>
+          <ch-charts-container
+            state-obj="[[stateObj]]"
+            card_width="[[cardWidth]]"
+            aggregation="true">
+          </ch-charts-container>
         </div>
       </div>
     </ha-card>
@@ -182,7 +191,7 @@
 </dom-module>
 <script>
 Polymer({
-  is: 'ha-transactive_home-card',
+  is: 'ch-transactive_home-card',
   properties: {
     hass: {
       type: Object,
@@ -210,7 +219,18 @@ Polymer({
     progressMessage: {
       type: String,
       computed: 'getProgressMessage(stateObj)'
+    },
+    cardWidth: {
+      type: Number
     }
+  },
+  ready: function() {
+      try {
+        this.cardWidth = this.getClientRects()[1].width;
+      }
+      catch(e) {
+
+      }
   },
   getPercentSavings: function (obj) {
       const lastYear = obj.attributes.progress_bar.last_year;

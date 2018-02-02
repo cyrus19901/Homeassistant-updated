@@ -1,10 +1,10 @@
 <link rel='import' href='../../bower_components/polymer/polymer.html'>
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 
-<link rel='import' href='./ha-hems-comparer.html'>
+<link rel='import' href='./ch-hems-comparer.html'>
 
 
-<dom-module id='ha-element-chooser'>
+<dom-module id='ch-element-chooser'>
   <template>
     <style is="custom-style" include="iron-flex"></style>
     <style>
@@ -19,14 +19,14 @@
           font-size: 16px;
           transform: translateY(-5px);
       }
-      ha-time-select {
+      ch-time-select {
         transform: translateY(-5px);
       }
     </style>
     <div class="display-inline">
       <template is="dom-if" if="[[isTime()]]">
         <div>
-          <ha-time-select 
+          <ch-time-select 
             hass="[[hass]]"
             state_obj="[[state_obj]]"
             update_method="[[item_update_method]]"
@@ -34,10 +34,22 @@
             device_name="[[device_name]]"
             setting_name="[[setting_name]]"
             attr_name="[[attr_name]]"
-          ></ha-time-select>
+          ></ch-time-select>
         </div>
       </template>
       <template is="dom-if" if="[[isNumber()]]">
+        <div>
+          <paper-input 
+            label=""
+            type="number"
+            on-change="updateSetting" 
+            value="[[item_value]]" 
+          >
+          </paper-input>
+        </div>
+        <div>[[item_units]]</div>
+      </template>
+      <template is="dom-if" if="[[isTemperature()]]">
         <div>
           <paper-input 
             label=""
@@ -55,11 +67,10 @@
 
 <script>
 Polymer({
-  is: 'ha-element-chooser',
+  is: 'ch-element-chooser',
   properties: {
     hass: {
-      type: Object,
-      observer: 'updateMaxes'
+      type: Object
     },
     state_obj: {
       type: Object
@@ -92,15 +103,22 @@ Polymer({
   isNumber: function () {
       return this.item_type === 'number';
   },
+  isTemperature: function () {
+      return this.item_type === 'temperature';
+  },
   updateSetting: function (evt) {
       const newValue = evt.currentTarget.value;
 
       const updateObj = { 
         'device': this.device_name,
         'setting': this.setting_name,
-        'attr': this.attr_name,
         'value': newValue 
       };
+
+      if (this.attr_name)
+      {
+          updateObj['attr'] = this.attr_name;
+      }
         
       this.callServiceHelper(this.item_update_method, updateObj);
   },

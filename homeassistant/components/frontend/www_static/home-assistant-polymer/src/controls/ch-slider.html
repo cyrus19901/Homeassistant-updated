@@ -1,7 +1,7 @@
 <link rel='import' href='../../bower_components/polymer/polymer.html'>
 <link rel="import" href="../../bower_components/paper-material/paper-material.html">
 
-<dom-module id='ha-slider'>
+<dom-module id='ch-slider'>
   <template>
     <style include="paper-material">
       :host {
@@ -11,7 +11,7 @@
         padding:0 6px 0 6px;
         background-color: white;
       }
-      .ha-slider {
+      .ch-slider {
         position: relative;
       }
       .normal-range {
@@ -27,7 +27,7 @@
     </style>
 
     <template is='dom-if' if='[[slider_value]]'>
-      <div class='ha-slider'>
+      <div class='ch-slider'>
         <div 
           class$='normal-range'
           style$='left: [[computeLeft(zone_min)]];
@@ -43,7 +43,7 @@
 
 <script>
 Polymer({
-  is: 'ha-slider',
+  is: 'ch-slider',
 
   properties: {
     hass: {

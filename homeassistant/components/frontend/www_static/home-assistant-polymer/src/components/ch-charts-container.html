@@ -1,0 +1,111 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
+
+<link rel="import" href="./ch-bar-chart.html">
+<link rel="import" href="./ch-line-chart.html">
+
+<dom-module id="ch-charts-container">
+  <template>
+    <style>
+    :host {
+      display: block;
+    }
+
+    .loading-container {
+      text-align: center;
+      padding: 8px;
+    }
+
+    .chart-title {
+      text-align: center;
+      transform: translateY(10px);
+      font-size: 18px;
+    }
+    </style>
+
+    <template is='dom-if' if='[[_isLoading]]'>
+      <div class='loading-container'>
+        <paper-spinner active alt='Updating history data'></paper-spinner>
+      </div>
+    </template>
+
+    <template is='dom-if' if='[[!_isLoading]]'>
+      <template is='dom-repeat' items="[[getChartSeries(stateObj)]]">
+        <div class="chart-title">[[item.label]]</div>
+        <template is='dom-if' if='[[isLineChart(item)]]'>
+          <ch-line-chart
+            hass="[[hass]]"
+            chart-data="[[item.data]]"
+            chart-label="[[item.label]]"
+            chart-id="[[item.id]]"
+            x-axis-label="[[item.xAxisLabel]]"
+            y-axis-label="[[item.yAxisLabel]]"
+            update-method="[[item.updateMethod]]"
+            component-name="[[stateObj._domain]]"
+            card-width="[[card_width]]"
+            aggregation="[[useAggregation]]">
+          </ch-line-chart>
+        </template>
+        <template is='dom-if' if='[[isBarChart(item)]]'>
+          <ch-bar-chart
+            hass="[[hass]]"
+            chart-data="[[item.data]]"
+            chart-label="[[item.label]]"
+            chart-id="[[item.id]]"
+            x-axis-label="[[item.xAxisLabel]]"
+            y-axis-label="[[item.yAxisLabel]]"
+            update-method="[[item.updateMethod]]"
+            component-name="[[stateObj._domain]]"
+            card-width="[[card_width]]"
+            aggregation="[[useAggregation]]">
+          </ch-bar-chart>
+        </template>
+      </template>
+    </template>
+  </template>
+</dom-module>
+
+<script>
+Polymer({
+  is: 'ch-charts-container',
+
+  properties: {
+    stateObj: {
+      type: Object
+    },
+    hass: {
+      type: Object,
+    },
+    _isLoading: {
+      type: Boolean,
+      value: false
+      // computed: '_computeIsLoading(isLoadingData, _apiLoaded)',
+    },
+    card_width: {
+      type: Number,
+      value: 400
+    },
+    aggregation: {
+      type: String,
+      value: ''
+    },
+    useAggregation: {
+      type: Boolean,
+      computed: 'getAggregation(aggregation)'
+    }
+  },
+  isLineChart: function (chart) {
+    return chart.type === 'line';
+  },
+  isBarChart: function (chart) {
+    return chart.type === 'bar';
+  },
+  getAggregation: function (aggregation) {
+      const useAggregation = aggregation == 'true';
+      return useAggregation;
+  },
+  getChartSeries: function (obj) {
+    return obj.attributes.chartSeries;
+  },
+});
+</script>

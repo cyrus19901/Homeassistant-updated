@@ -61,7 +61,7 @@ def setup(hass, config):
 
         time_of_use["attributes"] = attributes
 
-        hass.states.set('time_of_use.time_of_use_energy_and_savings', 'On', attributes, True)
+        hass.states.set('time_of_use.time_of_use_energy_and_savings', 'connected_homes', attributes, True)
 
     hass.services.register(
         DOMAIN,

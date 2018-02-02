@@ -26,6 +26,10 @@ REQUIRES = [
     'async_timeout==1.4.0',
     'chardet==3.0.4',
     'astral==1.4',
+    'aiohttp_cors>=0.5,<0.6',
+    'netdisco==1.2.2',
+    'xmltodict==0.11.0',
+    'SQLAlchemy==1.1.14',
 ]
 
 setup(

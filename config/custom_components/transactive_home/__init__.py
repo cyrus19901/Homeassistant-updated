@@ -134,24 +134,26 @@ class TransactiveComponent(Entity):
                         "time-format": "MM/DD",
                         "series": {
                             "historical": {
-                                "points": [ 3, 4, 6, 6, 7, 9, 11, 13, 16, 17 ],
+                                "points": [ 55, 57, 53, 58, 59, 56, 52, 53, 54, 55 ],
                                 "color": "#696969",
-                                "line-style": "dash"
+                                "line-style": "dot"
                             },
                             "actual": {
-                                "points": [ 4, 5, 7, 8, None, None, None, None, None, None ],
+                                "points": [ 52, 53, 53, 54, None, None, None, None, None, None ],
                                 "color": "#FF7F50",
                                 "line-style": ""
                             },
                             "transactive": {
-                                "points": [ 4, 5, 7, 8, 8, 8, 9, 9, 10, 12 ],
+                                "points": [ 53, 54, 54, 54, 53, 53, 52, 52, 53, 53 ],
                                 "color": "ForestGreen",
                                 "line-style": "dash"
                             }
                         }
                     },
                     "type": "line",
-                    "label": "Energy (kWh)",
+                    "label": "Energy",
+                    "yAxisLabel": "kWh",
+                    "xAxisLabel": "Date",
                     "id": "transactive-home"
                 }
             ]
